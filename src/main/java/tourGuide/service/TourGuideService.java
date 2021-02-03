@@ -71,7 +71,7 @@ public class TourGuideService {
     }
 
     public List<User> getAllUsers() {
-        return internalUserMap.values().stream().collect(Collectors.toList());
+        return internalUserMap.values().parallelStream().collect(Collectors.toList());
     }
 
     public void addUser(User user) {
@@ -95,6 +95,11 @@ public class TourGuideService {
         return visitedLocation;
     }
 
+    /**
+     * Return Top 5 attractions nearest to user visited location
+     * @param visitedLocation visited location
+     * @return top 5 attractions nearest to user visited location
+     */
     public NearbyAttractionDto getNearByAttractions(VisitedLocation visitedLocation) {
 
         //TODO : calculer la distance de l'utilisateur avec les attractions, extraire uniquement les 5 plus proches
@@ -116,15 +121,6 @@ public class TourGuideService {
         nearbyAttractionDto.setClosestAttractionsList(attractionClosestDtoList.parallelStream().sorted(Comparator.comparingDouble(AttractionClosestDto::getDistanceUserToAttraction)).limit(5).collect(Collectors.toList()));
 
         return  nearbyAttractionDto;
-        /*
-	    List<Attraction> nearbyAttractions = new ArrayList<>();
-		for(Attraction attraction : gpsUtil.getAttractions()) {
-			if(rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-				nearbyAttractions.add(attraction);
-			}
-		}
-		
-		return nearbyAttractions;*/
     }
 
     private void addShutDownHook() {
