@@ -1,17 +1,14 @@
 package tourGuide.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.stereotype.Service;
 
-import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
-import rewardCentral.RewardCentral;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
@@ -20,15 +17,15 @@ public class RewardsService {
     private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
 
     // proximity in miles
-    private int defaultProximityBuffer = 10;
-    private int proximityBuffer = defaultProximityBuffer;
-    private int attractionProximityRange = 200;
-    private final GpsUtil gpsUtil;
-    private final RewardCentral rewardsCentral;
+    private static final int DEFAULT_PROXIMITY_BUFFER = 10;
+    private int proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
+    private static final int ATTRACTION_PROXIMITY_RANGE = 200;
+    private final GpsUtilService gpsUtilService;
+    private final RewardCentralService rewardCentralService;
 
-    public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
-        this.gpsUtil = gpsUtil;
-        this.rewardsCentral = rewardCentral;
+    public RewardsService(GpsUtilService gpsUtilService, RewardCentralService rewardCentralService) {
+        this.gpsUtilService = gpsUtilService;
+        this.rewardCentralService = rewardCentralService;
     }
 
     public void setProximityBuffer(int proximityBuffer) {
@@ -36,14 +33,14 @@ public class RewardsService {
     }
 
     public void setDefaultProximityBuffer() {
-        proximityBuffer = defaultProximityBuffer;
+        proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
     }
 
     public void calculateRewards(User user) {
 
         //copy list of userLocations to avoid change of elements in this list during iterations on the list
         List<VisitedLocation> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
-        List<Attraction> attractions = gpsUtil.getAttractions();
+        List<Attraction> attractions = gpsUtilService.getAttractions();
 
         //utilisation de parallelStream pour accélérer le traitement
         userLocationsCopied.parallelStream().forEach(visitedLocation ->
@@ -58,15 +55,15 @@ public class RewardsService {
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
-        return getDistance(attraction, location) > attractionProximityRange ? false : true;
+        return (getDistance(attraction, location) <= ATTRACTION_PROXIMITY_RANGE);
     }
 
     private boolean nearAttraction(VisitedLocation visitedLocation, Attraction attraction) {
-        return getDistance(attraction, visitedLocation.location) > proximityBuffer ? false : true;
+        return (getDistance(attraction, visitedLocation.location) <= proximityBuffer);
     }
 
     public int getRewardPoints(Attraction attraction, UUID userId) {
-        return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, userId);
+        return rewardCentralService.getAttractionRewardPoints(attraction.attractionId, userId);
     }
 
 
@@ -80,8 +77,7 @@ public class RewardsService {
                 + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon1 - lon2));
 
         double nauticalMiles = 60 * Math.toDegrees(angle);
-        double statuteMiles = STATUTE_MILES_PER_NAUTICAL_MILE * nauticalMiles;
-        return statuteMiles;
+        return STATUTE_MILES_PER_NAUTICAL_MILE * nauticalMiles;
     }
 
 }

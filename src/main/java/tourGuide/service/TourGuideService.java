@@ -18,11 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
-import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionClosestDto;
 import tourGuide.model.NearbyAttractionDto;
@@ -34,16 +32,17 @@ import tripPricer.TripPricer;
 
 @Service
 public class TourGuideService {
-    private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
-    private final GpsUtil gpsUtil;
+    private final Logger logger = LoggerFactory.getLogger(TourGuideService.class);
+    private final GpsUtilService gpsUtilService;
     private final RewardsService rewardsService;
-    private final TripPricer tripPricer = new TripPricer();
+    private final TripPricerService tripPricerService;
     public final Tracker tracker;
     boolean testMode = true;
 
-    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
-        this.gpsUtil = gpsUtil;
+    public TourGuideService(GpsUtilService gpsUtilService, RewardsService rewardsService, TripPricerService tripPricerService) {
+        this.gpsUtilService = gpsUtilService;
         this.rewardsService = rewardsService;
+        this.tripPricerService = tripPricerService;
         Locale.setDefault(Locale.US);
         if (testMode) {
             logger.info("TestMode enabled");
@@ -60,10 +59,9 @@ public class TourGuideService {
     }
 
     public VisitedLocation getUserLocation(User user) {
-        VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ?
+        return  (user.getVisitedLocations().isEmpty()) ?
                 user.getLastVisitedLocation() :
                 trackUserLocation(user);
-        return visitedLocation;
     }
 
     public User getUser(String userName) {
@@ -81,15 +79,15 @@ public class TourGuideService {
     }
 
     public List<Provider> getTripDeals(User user) {
-        int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
-        List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
-                user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
+        int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
+        List<Provider> providers = tripPricerService.getPrice(TRIP_PRICER_API_KEY, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
+                user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
         user.setTripDeals(providers);
         return providers;
     }
 
     public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+        VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);
         rewardsService.calculateRewards(user);
         return visitedLocation;
@@ -105,7 +103,7 @@ public class TourGuideService {
         //TODO : calculer la distance de l'utilisateur avec les attractions, extraire uniquement les 5 plus proches
         List<AttractionClosestDto> attractionClosestDtoList = new ArrayList<>();
 
-        List<Attraction> attractionList = gpsUtil.getAttractions();
+        List<Attraction> attractionList = gpsUtilService.getAttractions();
 
         attractionList.parallelStream().forEach(attraction ->
                 {
@@ -136,7 +134,7 @@ public class TourGuideService {
      * Methods Below: For Internal Testing
      *
      **********************************************************************************/
-    private static final String tripPricerApiKey = "test-server-api-key";
+    private static final String TRIP_PRICER_API_KEY = "test-server-api-key";
     // Database connection will be used for external users, but for testing purposes internal users are provided and stored in memory
     private final Map<String, User> internalUserMap = new HashMap<>();
 
