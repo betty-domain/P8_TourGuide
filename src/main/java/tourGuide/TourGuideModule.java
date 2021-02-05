@@ -14,11 +14,6 @@ import tourGuide.service.TripPricerService;
 @Configuration
 public class TourGuideModule {
 
-    @Bean
-    public TourGuideService getTourGuideService()
-    {
-        return  new TourGuideService(getGpsUtilService(),getRewardsService(), getTripPricerService());
-    }
 
     @Bean
     public TripPricerService getTripPricerService()
@@ -30,15 +25,26 @@ public class TourGuideModule {
 	public GpsUtilService getGpsUtilService() {
 		return new GpsUtilService();
 	}
-	
-	@Bean
+
+    @Bean
+    public RewardCentralService getRewardCentralService() {
+        return new RewardCentralService();
+    }
+
+
+    @Bean
 	public RewardsService getRewardsService() {
 		return new RewardsService(getGpsUtilService(), getRewardCentralService());
 	}
-	
-	@Bean
-	public RewardCentralService getRewardCentralService() {
-		return new RewardCentralService();
-	}
-	
+
+
+    @Bean
+    public TourGuideService getTourGuideService()
+    {
+        TourGuideService tourGuideService =  new TourGuideService(getGpsUtilService(),getRewardsService(), getTripPricerService());
+        tourGuideService.tracker.startTracking();
+        return tourGuideService;
+    }
+
+
 }

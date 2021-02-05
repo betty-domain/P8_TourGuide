@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ import gpsUtil.location.VisitedLocation;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionClosestDto;
 import tourGuide.model.NearbyAttractionDto;
+import tourGuide.model.UserCurrentLocationDto;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
@@ -46,7 +48,6 @@ public class TourGuideService {
     public final Tracker tracker;
     boolean testMode = true;
 
-
     /**
      * Constructor with necessary service
      *
@@ -55,7 +56,7 @@ public class TourGuideService {
      * @param tripPricerService tripPricer service
      * @param startTracker true if tracker must be started
      */
-    public TourGuideService(GpsUtilService gpsUtilService, RewardsService rewardsService, TripPricerService tripPricerService, boolean startTracker) {
+    public TourGuideService(GpsUtilService gpsUtilService, RewardsService rewardsService, TripPricerService tripPricerService) {
         this.gpsUtilService = gpsUtilService;
         this.rewardsService = rewardsService;
         this.tripPricerService = tripPricerService;
@@ -66,19 +67,9 @@ public class TourGuideService {
             initializeInternalUsers();
             logger.debug("Finished initializing users");
         }
-        tracker = new Tracker(this,startTracker);
-        addShutDownHook();
-    }
+        tracker = new Tracker(this);
 
-    /**
-     * Constructor with necessary service. Tracker will be automatically started
-     *
-     * @param gpsUtilService    gpsUtil Service
-     * @param rewardsService    rewards Service
-     * @param tripPricerService tripPricer service
-     */
-    public TourGuideService(GpsUtilService gpsUtilService, RewardsService rewardsService, TripPricerService tripPricerService) {
-        this(gpsUtilService, rewardsService,tripPricerService,true);
+        addShutDownHook();
     }
 
     /**
@@ -99,7 +90,7 @@ public class TourGuideService {
      */
     public VisitedLocation getUserLocation(String username) {
         User user = this.getUser(username);
-        return (user.getVisitedLocations().isEmpty()) ?
+        return (!user.getVisitedLocations().isEmpty()) ?
                 user.getLastVisitedLocation() :
                 trackUserLocation(user);
     }
@@ -245,6 +236,23 @@ public class TourGuideService {
         nearbyAttractionDto.setClosestAttractionsList(attractionClosestDtoList.parallelStream().sorted(Comparator.comparingDouble(AttractionClosestDto::getDistanceUserToAttraction)).limit(5).collect(Collectors.toList()));
 
         return nearbyAttractionDto;
+    }
+
+    /**
+     * Get a list of every user's most recent location
+     * @return list of all user's last visited location
+     */
+    public List<UserCurrentLocationDto> getAllUsersCurrentLocation()
+    {
+        List<User> userList = this.getAllUsers();
+
+
+        List<UserCurrentLocationDto> userCurrentLocationDtos = new CopyOnWriteArrayList<>();
+        userList.parallelStream().forEach(user -> {
+            userCurrentLocationDtos.add(new UserCurrentLocationDto(user.getUserId().toString(),user.getLastVisitedLocation().location));
+        });
+
+        return  userCurrentLocationDtos;
     }
 
     private void addShutDownHook() {

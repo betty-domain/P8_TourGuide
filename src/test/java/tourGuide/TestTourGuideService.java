@@ -1,6 +1,7 @@
 package tourGuide;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import gpsUtil.location.VisitedLocation;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.NearbyAttractionDto;
+import tourGuide.model.UserCurrentLocationDto;
 import tourGuide.service.GpsUtilService;
 import tourGuide.service.RewardCentralService;
 import tourGuide.service.RewardsService;
@@ -37,15 +39,19 @@ public class TestTourGuideService {
         RewardsService rewardsService = new RewardsService(gpsUtilService, new RewardCentralService());
         InternalTestHelper.setInternalUserNumber(0);
         tourGuideService = new TourGuideService(gpsUtilService, rewardsService,new TripPricerService());
+        tourGuideService.tracker.startTracking();
     }
 
 	@Test
 	public void getUserLocation() {
 
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
-		tourGuideService.tracker.stopTracking();
-		assertTrue(visitedLocation.userId.equals(user.getUserId()));
+        tourGuideService.addUser(user);
+		/*VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+		tourGuideService.tracker.stopTracking();*/
+
+		assertNotNull(tourGuideService.getUserLocation(user.getUserName()));
+
 	}
 	
 	@Test
@@ -103,6 +109,16 @@ public class TestTourGuideService {
 		
 		assertEquals(5, nearbyAttractionDto.getClosestAttractionsList().size());
 	}
+
+	@Test
+    public void getAllCurrentUserLocations()
+    {
+        int nbUsers = tourGuideService.getAllUsers().size();
+
+        List<UserCurrentLocationDto> userCurrentLocationDtoList = tourGuideService.getAllUsersCurrentLocation();
+
+        assertEquals(userCurrentLocationDtoList.size(),nbUsers);
+    }
 
 	@Ignore
 	@Test

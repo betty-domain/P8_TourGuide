@@ -19,12 +19,17 @@ public class Tracker extends Thread {
 	private final TourGuideService tourGuideService;
 	private boolean stop = false;
 
-	public Tracker(TourGuideService tourGuideService, boolean startTracker) {
+	public Tracker(TourGuideService tourGuideService) {
 		this.tourGuideService = tourGuideService;
-		if (startTracker) {
-            executorService.submit(this);
-        }
 	}
+
+    /**
+     * strat trackingUser
+     */
+	public void startTracking()
+    {
+        executorService.submit(this);
+    }
 	
 	/**
 	 * Assures to shut down the Tracker thread

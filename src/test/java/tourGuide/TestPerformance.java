@@ -56,7 +56,8 @@ public class TestPerformance {
         rewardsService = new RewardsService(gpsUtilService, new RewardCentralService());
         InternalTestHelper.setInternalUserNumber(100000);
         //TODO : voir s'il est possible de désactiver le tracker pour les tests de performance afin d'éviter de faire le même traitement 2 fois en parallèle
-        tourGuideService = new TourGuideService(gpsUtilService, rewardsService, new TripPricerService(),false);
+        tourGuideService = new TourGuideService(gpsUtilService, rewardsService, new TripPricerService());
+        tourGuideService.tracker.stopTracking();
     }
 
     @Ignore
