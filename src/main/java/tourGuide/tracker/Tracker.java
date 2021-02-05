@@ -19,22 +19,25 @@ public class Tracker extends Thread {
 	private final TourGuideService tourGuideService;
 	private boolean stop = false;
 
-	public Tracker(TourGuideService tourGuideService) {
+	public Tracker(TourGuideService tourGuideService, boolean startTracker) {
 		this.tourGuideService = tourGuideService;
-		
-		executorService.submit(this);
+		if (startTracker) {
+            executorService.submit(this);
+        }
 	}
 	
 	/**
 	 * Assures to shut down the Tracker thread
 	 */
 	public void stopTracking() {
+	    logger.debug("stopTracking method execution");
 		stop = true;
 		executorService.shutdownNow();
 	}
 	
 	@Override
 	public void run() {
+	    logger.debug("Start run method on tracker");
 		StopWatch stopWatch = new StopWatch();
 		while(true) {
 			if(Thread.currentThread().isInterrupted() || stop) {
@@ -45,7 +48,8 @@ public class Tracker extends Thread {
 			List<User> users = tourGuideService.getAllUsers();
 			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
-			users.forEach(u -> tourGuideService.trackUserLocation(u));
+
+            tourGuideService.trackUserLocationForUserList(users);
 			stopWatch.stop();
 			logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds."); 
 			stopWatch.reset();
