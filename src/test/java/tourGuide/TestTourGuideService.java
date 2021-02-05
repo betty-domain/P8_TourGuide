@@ -24,6 +24,7 @@ import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.service.TripPricerService;
 import tourGuide.user.User;
+import tourGuide.user.UserPreferences;
 import tripPricer.Provider;
 
 public class TestTourGuideService {
@@ -120,10 +121,13 @@ public class TestTourGuideService {
         assertEquals(userCurrentLocationDtoList.size(),nbUsers);
     }
 
-	@Ignore
 	@Test
 	public void getTripDeals() {
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        UserPreferences userPreferences = new UserPreferences(1,"USD",5,2,2,3);
+        user.setUserPreferences(userPreferences);
+
+        tourGuideService.addUser(user);
 
 		List<Provider> providers = tourGuideService.getTripDeals(user.getUserName());
 		

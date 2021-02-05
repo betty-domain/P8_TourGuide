@@ -32,6 +32,7 @@ import tourGuide.model.NearbyAttractionDto;
 import tourGuide.model.UserCurrentLocationDto;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
+import tourGuide.user.UserPreferences;
 import tourGuide.user.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
@@ -282,6 +283,7 @@ public class TourGuideService {
             String email = userName + "@tourGuide.com";
             User user = new User(UUID.randomUUID(), userName, phone, email);
             generateUserLocationHistory(user);
+            generateUserPreference(user);
 
             internalUserMap.put(userName, user);
         });
@@ -297,6 +299,10 @@ public class TourGuideService {
         IntStream.range(0, 3).forEach(i -> {
             user.addToVisitedLocations(new VisitedLocation(user.getUserId(), new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
         });
+    }
+
+    private void generateUserPreference(User user) {
+        user.setUserPreferences(new UserPreferences(1,"USD",5,2,2,3));
     }
 
     /**

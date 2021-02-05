@@ -19,6 +19,17 @@ public class UserPreferences {
 	
 	public UserPreferences() {
 	}
+
+    public UserPreferences(int attractionProximity, String currency, int tripDuration, int ticketQuantity, int numberOfAdults, int numberOfChildren) {
+	    this.attractionProximity = attractionProximity;
+	    this.currency = Monetary.getCurrency(currency);
+	    this.lowerPricePoint = Money.of(0, currency);
+	    this.highPricePoint = Money.of(Integer.MAX_VALUE, currency);
+	    this.tripDuration =  tripDuration;
+	    this.ticketQuantity = ticketQuantity;
+	    this.numberOfAdults = numberOfAdults;
+	    this.numberOfChildren  = numberOfChildren;
+    }
 	
 	public void setAttractionProximity(int attractionProximity) {
 		this.attractionProximity = attractionProximity;
