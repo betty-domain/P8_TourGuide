@@ -5,20 +5,20 @@ import lombok.Data;
 import java.util.Date;
 import java.util.UUID;
 @Data
-public class VisitedLocation {
+public class VisitedLocationTourGuide {
 
     private UUID userId;
-    private Location location;
+    private LocationTourGuide locationTourGuide;
     private Date timeVisited;
 
-    public VisitedLocation()
+    public VisitedLocationTourGuide()
     {
 
     }
 
-    public VisitedLocation(UUID userId, Location location, Date timeVisited) {
+    public VisitedLocationTourGuide(UUID userId, LocationTourGuide locationTourGuide, Date timeVisited) {
         this.setUserId(userId);
-        this.setLocation(location);
+        this.setLocationTourGuide(locationTourGuide);
         this.setTimeVisited(timeVisited);
     }
 

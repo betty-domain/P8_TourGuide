@@ -1,13 +1,12 @@
 package tourGuide.user;
 
+import tourGuide.model.VisitedLocationTourGuide;
+import tripPricer.Provider;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import gpsUtil.location.VisitedLocation;
-import tripPricer.Provider;
 
 public class User {
     private final UUID userId;
@@ -15,7 +14,7 @@ public class User {
     private String phoneNumber;
     private String emailAddress;
     private Date latestLocationTimestamp;
-    private List<VisitedLocation> visitedLocations = new ArrayList<>();
+    private List<VisitedLocationTourGuide> visitedLocationTourGuides = new ArrayList<>();
     private List<UserReward> userRewards = new ArrayList<>();
     private UserPreferences userPreferences = new UserPreferences();
     private List<Provider> tripDeals = new ArrayList<>();
@@ -59,20 +58,20 @@ public class User {
         return latestLocationTimestamp;
     }
 
-    public void addToVisitedLocations(VisitedLocation visitedLocation) {
-        visitedLocations.add(visitedLocation);
+    public void addToVisitedLocations(VisitedLocationTourGuide visitedLocationTourGuide) {
+        visitedLocationTourGuides.add(visitedLocationTourGuide);
     }
 
-    public List<VisitedLocation> getVisitedLocations() {
-        return visitedLocations;
+    public List<VisitedLocationTourGuide> getVisitedLocations() {
+        return visitedLocationTourGuides;
     }
 
     public void clearVisitedLocations() {
-        visitedLocations.clear();
+        visitedLocationTourGuides.clear();
     }
 
     public void addUserReward(UserReward userReward) {
-        if (userRewards.stream().noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName))) {
+        if (userRewards.stream().noneMatch(r -> r.getAttractionTourGuide().getAttractionName().equals(userReward.getAttractionTourGuide().getAttractionName()))) {
             userRewards.add(userReward);
         }
     }
@@ -89,8 +88,8 @@ public class User {
         this.userPreferences = userPreferences;
     }
 
-    public VisitedLocation getLastVisitedLocation() {
-        return visitedLocations.get(visitedLocations.size() - 1);
+    public VisitedLocationTourGuide getLastVisitedLocation() {
+        return visitedLocationTourGuides.get(visitedLocationTourGuides.size() - 1);
     }
 
     public void setTripDeals(List<Provider> tripDeals) {

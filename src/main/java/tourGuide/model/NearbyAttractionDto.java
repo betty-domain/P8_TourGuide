@@ -1,7 +1,5 @@
 package tourGuide.model;
 
-import gpsUtil.location.Location;
-
 import java.util.List;
 
 /**
@@ -9,16 +7,16 @@ import java.util.List;
  */
 public class NearbyAttractionDto {
 
-    private Location userLocation;
+    private LocationTourGuide userLocationTourGuide;
 
     private List<AttractionClosestDto> closestAttractionsList;
 
-    public Location getUserLocation() {
-        return userLocation;
+    public LocationTourGuide getUserLocation() {
+        return userLocationTourGuide;
     }
 
-    public void setUserLocation(Location userLocation) {
-        this.userLocation = userLocation;
+    public void setUserLocation(LocationTourGuide userLocationTourGuide) {
+        this.userLocationTourGuide = userLocationTourGuide;
     }
 
     public List<AttractionClosestDto> getClosestAttractionsList() {

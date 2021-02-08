@@ -6,16 +6,16 @@ import lombok.Data;
  * Location POJO
  */
 @Data
-public class Location {
+public class LocationTourGuide {
 
     private double longitude;
     private double latitude;
 
-    public Location()
+    public LocationTourGuide()
     {
 
     }
-    public Location(double latitude, double longitude) {
+    public LocationTourGuide(double latitude, double longitude) {
         this.setLatitude(latitude);
         this.setLongitude(longitude);
     }

@@ -8,18 +8,18 @@ import java.util.UUID;
  * Attraction POJO
  */
 @Data
-public class Attraction extends Location {
+public class AttractionTourGuide extends LocationTourGuide {
     private String attractionName;
     private String city;
     private String state;
     private UUID attractionId;
 
-    public Attraction()
+    public AttractionTourGuide()
     {
 
     }
 
-    public Attraction(String attractionName, String city, String state, double latitude, double longitude) {
+    public AttractionTourGuide(String attractionName, String city, String state, double latitude, double longitude) {
         super(latitude, longitude);
         this.attractionName = attractionName;
         this.city = city;

@@ -1,9 +1,6 @@
 package tourGuide.model;
 
-import gpsUtil.location.Location;
 
-import java.util.List;
-import java.util.UUID;
 
 /**
  * DTO regroupant les données des localisations récentes d'un utilisateur
@@ -11,15 +8,15 @@ import java.util.UUID;
 public class UserCurrentLocationDto {
     private String userId;
 
-    private Location userLocation;
+    private LocationTourGuide userLocationTourGuide;
 
     /**
      * Construction with properties
      * @param userId user id
-     * @param location location of user
+     * @param locationTourGuide location of user
      */
-    public UserCurrentLocationDto(String userId, Location location) {
+    public UserCurrentLocationDto(String userId, LocationTourGuide locationTourGuide) {
         this.userId = userId;
-        this.userLocation = location;
+        this.userLocationTourGuide = locationTourGuide;
     }
 }
