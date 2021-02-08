@@ -118,9 +118,9 @@ public class TestTourGuideService {
         when(gpsUtilServiceMock.getUserLocation(user.getUserId())).thenReturn(Mono.just(visitedLocationMock));
 
         VisitedLocationTourGuide visitedLocationTourGuide = tourGuideService.trackUserLocation(user);
-        //tourGuideService.tracker.stopTracking();
 
         assertEquals(user.getUserId(), visitedLocationTourGuide.getUserId());
+        assertNotNull(visitedLocationTourGuide.getLocationTourGuide());
     }
 
     @Test
