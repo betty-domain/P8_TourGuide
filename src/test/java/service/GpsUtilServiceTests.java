@@ -1,7 +1,7 @@
 package service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gpsUtil.location.Attraction;
+
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -76,9 +76,9 @@ public class GpsUtilServiceTests {
     @Test
     public void getAllAttractions() throws Exception
     {
-        List<Attraction> attractionList = new ArrayList<>();
-        Attraction attraction1 = new Attraction("attraction1","city1","state1",10d,15d);
-        Attraction attraction2 = new Attraction("attraction2","city2","state2",25d,35d);
+        List<AttractionTourGuide> attractionList = new ArrayList<>();
+        AttractionTourGuide attraction1 = new AttractionTourGuide("attraction1","city1","state1",10d,15d);
+        AttractionTourGuide attraction2 = new AttractionTourGuide("attraction2","city2","state2",25d,35d);
 
         attractionList.add(attraction1);
         attractionList.add(attraction2);
