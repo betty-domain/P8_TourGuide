@@ -230,7 +230,7 @@ public class TourGuideService {
         );
 
         NearbyAttractionDto nearbyAttractionDto = new NearbyAttractionDto();
-        nearbyAttractionDto.setUserLocation(visitedLocationTourGuide.getLocationTourGuide());
+        nearbyAttractionDto.setUserLocationTourGuide(visitedLocationTourGuide.getLocationTourGuide());
         nearbyAttractionDto.setClosestAttractionsList(attractionClosestDtoList.parallelStream().sorted(Comparator.comparingDouble(AttractionClosestDto::getDistanceUserToAttraction)).limit(5).collect(Collectors.toList()));
 
         return nearbyAttractionDto;

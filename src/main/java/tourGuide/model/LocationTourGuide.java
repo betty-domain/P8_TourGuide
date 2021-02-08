@@ -1,11 +1,13 @@
 package tourGuide.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Location POJO
  */
-@Data
+@Getter
+@Setter
 public class LocationTourGuide {
 
     private double longitude;

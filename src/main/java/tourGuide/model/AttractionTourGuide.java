@@ -1,13 +1,15 @@
 package tourGuide.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
 /**
  * Attraction POJO
  */
-@Data
+@Getter
+@Setter
 public class AttractionTourGuide extends LocationTourGuide {
     private String attractionName;
     private String city;
