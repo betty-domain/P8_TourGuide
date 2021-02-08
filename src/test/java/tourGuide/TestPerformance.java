@@ -1,26 +1,25 @@
 package tourGuide;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.lang3.time.StopWatch;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import gpsUtil.location.Attraction;
-import gpsUtil.location.VisitedLocation;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import tourGuide.helper.InternalTestHelper;
+import tourGuide.model.AttractionTourGuide;
+import tourGuide.model.VisitedLocationTourGuide;
 import tourGuide.service.GpsUtilService;
 import tourGuide.service.RewardCentralService;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.service.TripPricerService;
 import tourGuide.user.User;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertTrue;
 
 public class TestPerformance {
 
@@ -49,7 +48,7 @@ public class TestPerformance {
 
     private GpsUtilService gpsUtilService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         gpsUtilService = new GpsUtilService();
 
@@ -60,7 +59,7 @@ public class TestPerformance {
         tourGuideService.tracker.stopTracking();
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void highVolumeTrackLocation() throws Exception {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
@@ -80,7 +79,7 @@ public class TestPerformance {
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void highVolumeTrackLocationNewPerf() {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
@@ -104,7 +103,7 @@ public class TestPerformance {
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void highVolumeGetRewards() {
 
@@ -112,10 +111,10 @@ public class TestPerformance {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        Attraction attraction = gpsUtilService.getAttractions().get(0);
+        AttractionTourGuide attractionTourGuide = gpsUtilService.getAttractions().collectList().block().get(0);
         List<User> allUsers = new ArrayList<>();
         allUsers = tourGuideService.getAllUsers();
-        allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
+        allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocationTourGuide(u.getUserId(), attractionTourGuide, new Date())));
 
         allUsers.forEach(u -> rewardsService.calculateRewards(u));
 
@@ -130,7 +129,7 @@ public class TestPerformance {
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void highVolumeGetRewardsNewPerf() throws Exception {
 
@@ -141,10 +140,10 @@ public class TestPerformance {
 
         //tourGuideService.tracker.stopTracking();
 
-        Attraction attraction = gpsUtilService.getAttractions().get(0);
+        AttractionTourGuide attractionTourGuide = gpsUtilService.getAttractions().collectList().block().get(0);
         List<User> allUsers =  tourGuideService.getAllUsers();
 
-        allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
+        allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocationTourGuide(u.getUserId(), attractionTourGuide, new Date())));
 
         rewardsService.calculateRewardsForUserList(allUsers);
 

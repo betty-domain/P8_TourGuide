@@ -1,5 +1,21 @@
 package tourGuide.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import tourGuide.helper.InternalTestHelper;
+import tourGuide.model.AttractionTourGuide;
+import tourGuide.model.AttractionClosestDto;
+import tourGuide.model.LocationTourGuide;
+import tourGuide.model.NearbyAttractionDto;
+import tourGuide.model.UserCurrentLocationDto;
+import tourGuide.model.VisitedLocationTourGuide;
+import tourGuide.tracker.Tracker;
+import tourGuide.user.User;
+import tourGuide.user.UserPreferences;
+import tourGuide.user.UserReward;
+import tripPricer.Provider;
+
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -19,24 +35,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
-import tourGuide.helper.InternalTestHelper;
-import tourGuide.model.AttractionClosestDto;
-import tourGuide.model.NearbyAttractionDto;
-import tourGuide.model.UserCurrentLocationDto;
-import tourGuide.tracker.Tracker;
-import tourGuide.user.User;
-import tourGuide.user.UserPreferences;
-import tourGuide.user.UserReward;
-import tripPricer.Provider;
-import tripPricer.TripPricer;
-
 /**
  * TourGuide Service
  */
@@ -55,7 +53,6 @@ public class TourGuideService {
      * @param gpsUtilService    gpsUtil Service
      * @param rewardsService    rewards Service
      * @param tripPricerService tripPricer service
-     * @param startTracker true if tracker must be started
      */
     public TourGuideService(GpsUtilService gpsUtilService, RewardsService rewardsService, TripPricerService tripPricerService) {
         this.gpsUtilService = gpsUtilService;
@@ -89,7 +86,7 @@ public class TourGuideService {
      * @param username username
      * @return last user visited location
      */
-    public VisitedLocation getUserLocation(String username) {
+    public VisitedLocationTourGuide getUserLocation(String username) {
         User user = this.getUser(username);
         return (!user.getVisitedLocations().isEmpty()) ?
                 user.getLastVisitedLocation() :
@@ -149,11 +146,11 @@ public class TourGuideService {
      * @param user user to track
      * @return last visitedLocation
      */
-    public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsUtilService.getUserLocation(user.getUserId());
-        user.addToVisitedLocations(visitedLocation);
+    public VisitedLocationTourGuide trackUserLocation(User user) {
+        VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilService.getUserLocation(user.getUserId()).block();
+        user.addToVisitedLocations(visitedLocationTourGuide);
         rewardsService.calculateRewards(user);
-        return visitedLocation;
+        return visitedLocationTourGuide;
     }
 
     /**
@@ -196,13 +193,13 @@ public class TourGuideService {
      * @param user user to track
      * @return last visitedLocation
      */
-    public CompletableFuture<VisitedLocation> trackUserLocationNew(User user) {
+    public CompletableFuture<VisitedLocationTourGuide> trackUserLocationNew(User user) {
 
         ExecutorService executorService = Executors.newFixedThreadPool(1000);
 
         return CompletableFuture.supplyAsync(() ->
         {
-            return gpsUtilService.getUserLocation(user.getUserId());
+            return gpsUtilService.getUserLocation(user.getUserId()).block();
         }, executorService).
                 thenApply(visitedLocation -> {
                             user.addToVisitedLocations(visitedLocation);
@@ -215,25 +212,25 @@ public class TourGuideService {
     /**
      * Return Top 5 attractions nearest to user
      *
-     * @param visitedLocation visited location
+     * @param visitedLocationTourGuide visited location
      * @return top 5 attractions nearest to user last visited location
      */
-    public NearbyAttractionDto getNearByAttractions(VisitedLocation visitedLocation) {
+    public NearbyAttractionDto getNearByAttractions(VisitedLocationTourGuide visitedLocationTourGuide) {
         List<AttractionClosestDto> attractionClosestDtoList = new ArrayList<>();
 
-        List<Attraction> attractionList = gpsUtilService.getAttractions();
+        List<AttractionTourGuide> attractionTourGuideList = gpsUtilService.getAttractions().collectList().block();
 
-        attractionList.parallelStream().forEach(attraction ->
+        attractionTourGuideList.parallelStream().forEach(attraction ->
                 {
-                    AttractionClosestDto attractionClosestDto = new AttractionClosestDto(attraction.attractionName, attraction,
-                            rewardsService.getDistance(attraction, visitedLocation.location), rewardsService.getRewardPoints(attraction, visitedLocation.userId));
+                    AttractionClosestDto attractionClosestDto = new AttractionClosestDto(attraction.getAttractionName(), attraction,
+                            rewardsService.getDistance(attraction, visitedLocationTourGuide.getLocationTourGuide()), rewardsService.getRewardPoints(attraction, visitedLocationTourGuide.getUserId()));
 
                     attractionClosestDtoList.add(attractionClosestDto);
                 }
         );
 
         NearbyAttractionDto nearbyAttractionDto = new NearbyAttractionDto();
-        nearbyAttractionDto.setUserLocation(visitedLocation.location);
+        nearbyAttractionDto.setUserLocation(visitedLocationTourGuide.getLocationTourGuide());
         nearbyAttractionDto.setClosestAttractionsList(attractionClosestDtoList.parallelStream().sorted(Comparator.comparingDouble(AttractionClosestDto::getDistanceUserToAttraction)).limit(5).collect(Collectors.toList()));
 
         return nearbyAttractionDto;
@@ -250,7 +247,7 @@ public class TourGuideService {
 
         List<UserCurrentLocationDto> userCurrentLocationDtos = new CopyOnWriteArrayList<>();
         userList.parallelStream().forEach(user -> {
-            userCurrentLocationDtos.add(new UserCurrentLocationDto(user.getUserId().toString(),user.getLastVisitedLocation().location));
+            userCurrentLocationDtos.add(new UserCurrentLocationDto(user.getUserId().toString(),user.getLastVisitedLocation().getLocationTourGuide()));
         });
 
         return  userCurrentLocationDtos;
@@ -297,7 +294,7 @@ public class TourGuideService {
      */
     private void generateUserLocationHistory(User user) {
         IntStream.range(0, 3).forEach(i -> {
-            user.addToVisitedLocations(new VisitedLocation(user.getUserId(), new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
+            user.addToVisitedLocations(new VisitedLocationTourGuide(user.getUserId(), new LocationTourGuide(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
         });
     }
 

@@ -1,5 +1,14 @@
 package tourGuide.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import tourGuide.model.AttractionTourGuide;
+import tourGuide.model.LocationTourGuide;
+import tourGuide.model.VisitedLocationTourGuide;
+import tourGuide.user.User;
+import tourGuide.user.UserReward;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -8,16 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
-import tourGuide.user.User;
-import tourGuide.user.UserReward;
 
 /**
  * Rewards Service
@@ -73,15 +72,15 @@ public class RewardsService {
     public void calculateRewards(User user) {
 
         //copy list of userLocations to avoid change of elements in this list during iterations on the list
-        List<VisitedLocation> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
+        List<VisitedLocationTourGuide> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
         logger.debug("User nb visitedLocation : " + userLocationsCopied.size());
-        List<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
+        List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions().collectList().block());
 
         //utilisation de parallelStream pour accélérer le traitement
         userLocationsCopied.parallelStream().forEach(visitedLocation ->
                 {
-                    attractions.parallelStream().forEach(attraction -> {
-                        if (user.getUserRewards().parallelStream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
+                    attractionTourGuides.parallelStream().forEach(attraction -> {
+                        if (user.getUserRewards().parallelStream().noneMatch(r -> r.getAttractionTourGuide().getAttractionName().equals(attraction.getAttractionName()))) {
                             if (nearAttraction(visitedLocation, attraction)) {
                                 user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user.getUserId())));
                             }
@@ -132,21 +131,21 @@ public class RewardsService {
 
 
         //copy list of userLocations to avoid change of elements in this list during iterations on the list
-        List<VisitedLocation> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
-        List<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
+        List<VisitedLocationTourGuide> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
+        List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions().collectList().block());
 
         List<CompletableFuture<Void>> completableFutures = new ArrayList<>();
 
         logger.debug("User nb visitedLocation : " + userLocationsCopied.size());
 
         //utilisation de parallelStream pour accélérer le traitement
-        for (VisitedLocation visitedLocation : userLocationsCopied) {
-            for (Attraction attraction : attractions) {
-                if (user.getUserRewards().parallelStream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
-                    if (nearAttraction(visitedLocation, attraction)) {
+        for (VisitedLocationTourGuide visitedLocationTourGuide : userLocationsCopied) {
+            for (AttractionTourGuide attractionTourGuide : attractionTourGuides) {
+                if (user.getUserRewards().parallelStream().noneMatch(r -> r.getAttractionTourGuide().getAttractionName().equals(attractionTourGuide.getAttractionName()))) {
+                    if (nearAttraction(visitedLocationTourGuide, attractionTourGuide)) {
                         completableFutures.add(
                                 CompletableFuture.runAsync(() -> {
-                                    user.addUserReward(new UserReward(visitedLocation, attraction, this.getRewardPoints(attraction, user.getUserId())));
+                                    user.addUserReward(new UserReward(visitedLocationTourGuide, attractionTourGuide, this.getRewardPoints(attractionTourGuide, user.getUserId())));
                                 }, rewardsExecutorService)
                         );
                     }
@@ -162,27 +161,27 @@ public class RewardsService {
     /**
      * Check if a given location is in Attraction Proximity
      *
-     * @param attraction attraction
-     * @param location   location
+     * @param attractionTourGuide attraction
+     * @param locationTourGuide   location
      * @return true if location is in Attraction Proximity, false otherwise
      */
-    public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
-        return (getDistance(attraction, location) <= ATTRACTION_PROXIMITY_RANGE);
+    public boolean isWithinAttractionProximity(AttractionTourGuide attractionTourGuide, LocationTourGuide locationTourGuide) {
+        return (getDistance(attractionTourGuide, locationTourGuide) <= ATTRACTION_PROXIMITY_RANGE);
     }
 
-    private boolean nearAttraction(VisitedLocation visitedLocation, Attraction attraction) {
-        return (getDistance(attraction, visitedLocation.location) <= proximityBuffer);
+    private boolean nearAttraction(VisitedLocationTourGuide visitedLocationTourGuide, AttractionTourGuide attractionTourGuide) {
+        return (getDistance(attractionTourGuide, visitedLocationTourGuide.getLocationTourGuide()) <= proximityBuffer);
     }
 
     /**
      * Return rewardsPoints when user visited an attraction
      *
-     * @param attraction attraction
+     * @param attractionTourGuide attraction
      * @param userId     userId
      * @return number of rewards points
      */
-    public int getRewardPoints(Attraction attraction, UUID userId) {
-        return rewardCentralService.getAttractionRewardPoints(attraction.attractionId, userId);
+    public int getRewardPoints(AttractionTourGuide attractionTourGuide, UUID userId) {
+        return rewardCentralService.getAttractionRewardPoints(attractionTourGuide.getAttractionId(), userId);
     }
 
     /**
@@ -192,11 +191,11 @@ public class RewardsService {
      * @param loc2 location 2
      * @return distance between location
      */
-    public double getDistance(Location loc1, Location loc2) {
-        double lat1 = Math.toRadians(loc1.latitude);
-        double lon1 = Math.toRadians(loc1.longitude);
-        double lat2 = Math.toRadians(loc2.latitude);
-        double lon2 = Math.toRadians(loc2.longitude);
+    public double getDistance(LocationTourGuide loc1, LocationTourGuide loc2) {
+        double lat1 = Math.toRadians(loc1.getLatitude());
+        double lon1 = Math.toRadians(loc1.getLongitude());
+        double lat2 = Math.toRadians(loc2.getLatitude());
+        double lon2 = Math.toRadians(loc2.getLongitude());
 
         double angle = Math.acos(Math.sin(lat1) * Math.sin(lat2)
                 + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon1 - lon2));

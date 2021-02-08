@@ -1,13 +1,16 @@
 package tourGuide.service;
 
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.VisitedLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import tourGuide.model.AttractionTourGuide;
+import tourGuide.model.VisitedLocationTourGuide;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -17,14 +20,33 @@ import java.util.UUID;
 public class GpsUtilService {
     private final Logger logger = LoggerFactory.getLogger(GpsUtilService.class);
 
-    private final GpsUtil gpsUtil;
+
+    private static final String defaultGpsUtilRootUrl = "http://localhost:8101";
+
+    public static final String attractionsEndpoint = "/attractions";
+
+    public static final String userLocationEndpoint= "/userLocation";
+
+
+    private WebClient webClient;
 
     /**
      * Constructor that initialize a new gpsUtil class
      */
     public GpsUtilService()
     {
-        gpsUtil = new GpsUtil();
+        this(defaultGpsUtilRootUrl);
+    }
+
+    /**
+     * Constructor with gopsUtilRoot url in param
+     * @param gpsUtilRootUrl rootUrl for gpsUtil api
+     */
+    public GpsUtilService(String gpsUtilRootUrl)
+    {
+        webClient = WebClient.builder().baseUrl(gpsUtilRootUrl).
+                defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).
+                build();
     }
 
     /**
@@ -32,19 +54,25 @@ public class GpsUtilService {
      * @param userId userId
      * @return get VisitedLocation for given user
      */
-    public VisitedLocation getUserLocation(UUID userId)
+    public Mono<VisitedLocationTourGuide> getUserLocation(UUID userId)
     {
-        logger.debug("Call to gpsUtil.getUSerLocation(" + userId + ")");
-        return gpsUtil.getUserLocation(userId);
+        logger.debug("Call to gpsUtilService.getUserLocation(" + userId + ")");
+        return webClient.get().uri(uriBuilder ->
+                uriBuilder.path(userLocationEndpoint).
+                        queryParam("userId",userId.toString()).build()).retrieve().bodyToMono(VisitedLocationTourGuide.class);
     }
 
     /**
      * get list of all Attractions
      * @return list of attractions
      */
-    public List<Attraction> getAttractions()
+    public Flux<AttractionTourGuide> getAttractions()
     {
-        logger.debug("Call to gpsUtil.getAttractions()");
-        return gpsUtil.getAttractions();
+        logger.debug("Call to gpsUtilService.getAttractions()");
+
+        return webClient.get().uri(uriBuilder ->
+                uriBuilder.path(attractionsEndpoint).build()).retrieve().
+                bodyToFlux(AttractionTourGuide.class);
+
     }
 }
