@@ -36,8 +36,7 @@ public class TestRewardsService {
 
     @BeforeEach
     public void setUp() {
-        rewardsService = new RewardsService(gpsUtilServiceMock, new RewardCentralService());
-        when(rewardCentralServiceMock.getAttractionRewardPoints(any(), any())).thenReturn(25);
+        rewardsService = new RewardsService(gpsUtilServiceMock, rewardCentralServiceMock);
     }
 
     @Test
@@ -47,6 +46,7 @@ public class TestRewardsService {
         AttractionTourGuide attractionTourGuide2 = new AttractionTourGuide("att2", "city", "", 25.5, 40.5);
 
         when(gpsUtilServiceMock.getAttractions()).thenReturn(Flux.just(attractionTourGuide1, attractionTourGuide2));
+        when(rewardCentralServiceMock.getAttractionRewardPoints(any(), any())).thenReturn(25);
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         AttractionTourGuide attractionTourGuide = gpsUtilServiceMock.getAttractions().collectList().block().get(0);
@@ -57,6 +57,7 @@ public class TestRewardsService {
         List<UserReward> userRewards = user.getUserRewards();
 
         assertTrue(userRewards.size() == 1);
+        assertEquals(userRewards.get(0).getRewardPoints(),25);
     }
 
     @Test
@@ -66,6 +67,7 @@ public class TestRewardsService {
         AttractionTourGuide attractionTourGuide2 = new AttractionTourGuide("att2", "city", "", 25.5, 40.5);
 
         when(gpsUtilServiceMock.getAttractions()).thenReturn(Flux.just(attractionTourGuide1, attractionTourGuide2));
+        when(rewardCentralServiceMock.getAttractionRewardPoints(any(), any())).thenReturn(25);
 
         User user1 = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         AttractionTourGuide attractionTourGuide_user1 = gpsUtilServiceMock.getAttractions().collectList().block().get(0);
@@ -83,6 +85,7 @@ public class TestRewardsService {
         userList.stream().forEach(user ->
                 {
                     assertTrue(user.getUserRewards().size() == 1);
+                    assertEquals(user.getUserRewards().get(0).getRewardPoints(),25);
                 }
         );
     }
