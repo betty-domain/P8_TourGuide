@@ -8,6 +8,7 @@ import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.LocationTourGuide;
 import tourGuide.model.NearbyAttractionDto;
+import tourGuide.model.Provider;
 import tourGuide.model.UserCurrentLocationDto;
 import tourGuide.model.VisitedLocationTourGuide;
 import tourGuide.service.GpsUtilService;
@@ -16,7 +17,6 @@ import tourGuide.service.TourGuideService;
 import tourGuide.service.TripPricerService;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
-import tripPricer.Provider;
 
 import java.sql.Date;
 import java.time.Instant;
@@ -36,15 +36,16 @@ public class TestTourGuideService {
 
     private TourGuideService tourGuideService;
 
-    private GpsUtilService gpsUtilServiceMock = Mockito.mock(GpsUtilService.class);
+    private final GpsUtilService gpsUtilServiceMock = Mockito.mock(GpsUtilService.class);
 
-    private RewardsService rewardsServiceMock = Mockito.mock(RewardsService.class);
+    private final RewardsService rewardsServiceMock = Mockito.mock(RewardsService.class);
+
+    private final TripPricerService tripPricerServiceMock = Mockito.mock(TripPricerService.class);
 
     @BeforeEach
     public void setUp() {
         InternalTestHelper.setInternalUserNumber(0);
-        tourGuideService = new TourGuideService(gpsUtilServiceMock, rewardsServiceMock, new TripPricerService());
-        //tourGuideService.tracker.startTracking();
+        tourGuideService = new TourGuideService(gpsUtilServiceMock, rewardsServiceMock, tripPricerServiceMock);
     }
 
     @Test
@@ -87,8 +88,6 @@ public class TestTourGuideService {
         User retrievedUser = tourGuideService.getUser(user.getUserName());
         User retrievedUser2 = tourGuideService.getUser(user2.getUserName());
 
-        //tourGuideService.tracker.stopTracking();
-
         assertEquals(user, retrievedUser);
         assertEquals(user2, retrievedUser2);
     }
@@ -102,8 +101,6 @@ public class TestTourGuideService {
         tourGuideService.addUser(user2);
 
         List<User> allUsers = tourGuideService.getAllUsers();
-
-        //tourGuideService.tracker.stopTracking();
 
         assertTrue(allUsers.contains(user));
         assertTrue(allUsers.contains(user2));
@@ -140,8 +137,6 @@ public class TestTourGuideService {
 
         NearbyAttractionDto nearbyAttractionDto = tourGuideService.getNearByAttractions(visitedLocationTourGuide);
 
-        //tourGuideService.tracker.stopTracking();
-
         assertEquals(2, nearbyAttractionDto.getClosestAttractionsList().size());
     }
 
@@ -162,11 +157,15 @@ public class TestTourGuideService {
 
         tourGuideService.addUser(user);
 
+        List<Provider> providersList = new ArrayList<>();
+        providersList.add(new Provider(UUID.randomUUID(),"Provider 1",25.5));
+        providersList.add(new Provider(UUID.randomUUID(),"Provider 2",124.85));
+
+        when(tripPricerServiceMock.getPrice("test-server-api-key",user.getUserId(), userPreferences.getNumberOfAdults(), userPreferences.getNumberOfChildren(), userPreferences.getTripDuration(), 0)).thenReturn(providersList);
+
         List<Provider> providers = tourGuideService.getTripDeals(user.getUserName());
 
-        tourGuideService.tracker.stopTracking();
-
-        assertEquals(5, providers.size());
+        assertEquals(2, providers.size());
     }
 
 }

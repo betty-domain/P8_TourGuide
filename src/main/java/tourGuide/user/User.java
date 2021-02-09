@@ -1,7 +1,7 @@
 package tourGuide.user;
 
+import tourGuide.model.Provider;
 import tourGuide.model.VisitedLocationTourGuide;
-import tripPricer.Provider;
 
 import java.util.ArrayList;
 import java.util.Date;

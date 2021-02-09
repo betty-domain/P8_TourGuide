@@ -8,13 +8,13 @@ import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.AttractionClosestDto;
 import tourGuide.model.LocationTourGuide;
 import tourGuide.model.NearbyAttractionDto;
+import tourGuide.model.Provider;
 import tourGuide.model.UserCurrentLocationDto;
 import tourGuide.model.VisitedLocationTourGuide;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
 import tourGuide.user.UserReward;
-import tripPricer.Provider;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

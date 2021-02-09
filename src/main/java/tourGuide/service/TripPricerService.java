@@ -2,9 +2,12 @@ package tourGuide.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import tripPricer.Provider;
-import tripPricer.TripPricer;
+import org.springframework.web.reactive.function.client.WebClient;
+import tourGuide.model.Provider;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,14 +20,27 @@ public class TripPricerService {
 
     private final Logger logger = LoggerFactory.getLogger(TripPricerService.class);
 
-    private final TripPricer tripPricer;
+    private static final String defaultTripPricerRootUrl = "http://localhost:8103";
+
+    public static final String priceEndpoint = "/price";
+
+    public static final String providerNameEndpoint = "/providerName";
+
+    private final WebClient webClient;
 
     /**
      * Constructor of TripPricer Service
      */
     public TripPricerService()
     {
-        tripPricer = new TripPricer();
+        this(defaultTripPricerRootUrl);
+    }
+
+    public TripPricerService(String tripPricerRootUrl)
+    {
+        webClient = WebClient.builder().baseUrl(tripPricerRootUrl).
+                defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).
+                build();
     }
 
     /**
@@ -40,7 +56,15 @@ public class TripPricerService {
     public List<Provider> getPrice(String apiKey, UUID attractionId, int adults, int children, int nightsStay, int rewardsPoints)
     {
         logger.debug("Call to tripPricer.getPrice");
-        return  tripPricer.getPrice(apiKey,attractionId,adults, children, nightsStay, rewardsPoints);
+
+        return  webClient.method(HttpMethod.GET).uri(uriBuilder ->
+                uriBuilder.path(priceEndpoint).queryParam("apiKey",apiKey)
+                        .queryParam("adults",adults)
+                        .queryParam("children",children)
+                        .queryParam("attractionId",attractionId)
+                        .queryParam("nightsStay", nightsStay)
+                        .queryParam("rewardsPoints",rewardsPoints)
+                        .build()).retrieve().bodyToFlux(Provider.class).collectList().block();
     }
 
     /**
@@ -52,7 +76,10 @@ public class TripPricerService {
     public String getProviderName(String apiKey, int adults)
     {
         logger.debug("Call to tripPricer.getProviderName");
-        return tripPricer.getProviderName(apiKey,adults);
+        return webClient.get().uri(uriBuilder ->
+                uriBuilder.path(providerNameEndpoint).
+                        queryParam("apiKey",apiKey).
+                        queryParam("adults",adults).build()).retrieve().bodyToMono(String.class).block();
     }
 
 }
