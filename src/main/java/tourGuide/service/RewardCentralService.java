@@ -2,26 +2,37 @@ package tourGuide.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import rewardCentral.RewardCentral;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
-/**
- * Reward Central service class
- */
 @Service
 public class RewardCentralService {
     private final Logger logger = LoggerFactory.getLogger(RewardCentralService.class);
 
-    private final RewardCentral rewardCentral;
+    private static final String defaultRewardsCentralRootUrl = "http://localhost:8102";
+
+    public static final String attractionsRewardsEndpoint = "/rewardsPoints";
+
+    private final WebClient webClient;
 
     /**
      * Constructor of service
      */
     public RewardCentralService()
     {
-        rewardCentral = new RewardCentral();
+        this(defaultRewardsCentralRootUrl);
+    }
+
+    public RewardCentralService(String rewardsCentralRootUrl)
+    {
+        webClient = WebClient.builder().baseUrl(rewardsCentralRootUrl).
+                defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).
+                build();
     }
 
     /**
@@ -33,7 +44,14 @@ public class RewardCentralService {
     public int getAttractionRewardPoints(UUID attractionId, UUID userId)
     {
         logger.debug("Call to rewardCentral.getAttractionRewardPoints("+ attractionId + "," + userId+ ")");
-        return rewardCentral.getAttractionRewardPoints(attractionId,userId);
+
+        Mono<Integer> integerMono = webClient.get().uri(uriBuilder ->
+                uriBuilder.path(attractionsRewardsEndpoint).
+                        queryParam("attractionId",attractionId.toString()).
+                queryParam("userId",userId.toString()).build()).retrieve().bodyToMono(Integer.class);
+
+
+        return integerMono.blockOptional().orElse(Integer.MIN_VALUE);
     }
 
 }
