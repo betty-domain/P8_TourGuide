@@ -147,7 +147,7 @@ public class TourGuideService {
      * @return last visitedLocation
      */
     public VisitedLocationTourGuide trackUserLocation(User user) {
-        VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilService.getUserLocation(user.getUserId()).block();
+        VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilService.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocationTourGuide);
         rewardsService.calculateRewards(user);
         return visitedLocationTourGuide;
@@ -199,7 +199,7 @@ public class TourGuideService {
 
         return CompletableFuture.supplyAsync(() ->
         {
-            return gpsUtilService.getUserLocation(user.getUserId()).block();
+            return gpsUtilService.getUserLocation(user.getUserId());
         }, executorService).
                 thenApply(visitedLocation -> {
                             user.addToVisitedLocations(visitedLocation);
@@ -218,7 +218,7 @@ public class TourGuideService {
     public NearbyAttractionDto getNearByAttractions(VisitedLocationTourGuide visitedLocationTourGuide) {
         List<AttractionClosestDto> attractionClosestDtoList = new ArrayList<>();
 
-        List<AttractionTourGuide> attractionTourGuideList = gpsUtilService.getAttractions().collectList().block();
+        List<AttractionTourGuide> attractionTourGuideList = gpsUtilService.getAttractions();
 
         attractionTourGuideList.parallelStream().forEach(attraction ->
                 {

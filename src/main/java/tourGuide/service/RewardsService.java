@@ -74,7 +74,7 @@ public class RewardsService {
         //copy list of userLocations to avoid change of elements in this list during iterations on the list
         List<VisitedLocationTourGuide> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
         logger.debug("User nb visitedLocation : " + userLocationsCopied.size());
-        List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions().collectList().block());
+        List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
 
         //utilisation de parallelStream pour accélérer le traitement
         userLocationsCopied.parallelStream().forEach(visitedLocation ->
@@ -132,7 +132,7 @@ public class RewardsService {
 
         //copy list of userLocations to avoid change of elements in this list during iterations on the list
         List<VisitedLocationTourGuide> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
-        List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions().collectList().block());
+        List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
 
         List<CompletableFuture<Void>> completableFutures = new ArrayList<>();
 

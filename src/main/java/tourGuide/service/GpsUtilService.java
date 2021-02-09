@@ -6,11 +6,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -54,25 +53,25 @@ public class GpsUtilService {
      * @param userId userId
      * @return get VisitedLocation for given user
      */
-    public Mono<VisitedLocationTourGuide> getUserLocation(UUID userId)
+    public VisitedLocationTourGuide getUserLocation(UUID userId)
     {
         logger.debug("Call to gpsUtilService.getUserLocation(" + userId + ")");
         return webClient.get().uri(uriBuilder ->
                 uriBuilder.path(userLocationEndpoint).
-                        queryParam("userId",userId.toString()).build()).retrieve().bodyToMono(VisitedLocationTourGuide.class);
+                        queryParam("userId",userId.toString()).build()).retrieve().bodyToMono(VisitedLocationTourGuide.class).block();
     }
 
     /**
      * get list of all Attractions
      * @return list of attractions
      */
-    public Flux<AttractionTourGuide> getAttractions()
+    public List<AttractionTourGuide> getAttractions()
     {
         logger.debug("Call to gpsUtilService.getAttractions()");
 
         return webClient.get().uri(uriBuilder ->
                 uriBuilder.path(attractionsEndpoint).build()).retrieve().
-                bodyToFlux(AttractionTourGuide.class);
+                bodyToFlux(AttractionTourGuide.class).collectList().block();
 
     }
 }

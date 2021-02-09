@@ -111,7 +111,7 @@ public class TestPerformance {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        AttractionTourGuide attractionTourGuide = gpsUtilService.getAttractions().collectList().block().get(0);
+        AttractionTourGuide attractionTourGuide = gpsUtilService.getAttractions().get(0);
         List<User> allUsers = new ArrayList<>();
         allUsers = tourGuideService.getAllUsers();
         allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocationTourGuide(u.getUserId(), attractionTourGuide, new Date())));
@@ -140,7 +140,7 @@ public class TestPerformance {
 
         //tourGuideService.tracker.stopTracking();
 
-        AttractionTourGuide attractionTourGuide = gpsUtilService.getAttractions().collectList().block().get(0);
+        AttractionTourGuide attractionTourGuide = gpsUtilService.getAttractions().get(0);
         List<User> allUsers =  tourGuideService.getAllUsers();
 
         allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocationTourGuide(u.getUserId(), attractionTourGuide, new Date())));

@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.LocationTourGuide;
@@ -22,6 +20,7 @@ import tripPricer.Provider;
 
 import java.sql.Date;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,7 +69,7 @@ public class TestTourGuideService {
         VisitedLocationTourGuide visitedLocation = new VisitedLocationTourGuide(user.getUserId(), new LocationTourGuide(25.5, 42.6), Date.from(Instant.now()));
         tourGuideService.addUser(user);
 
-        when(gpsUtilServiceMock.getUserLocation(user.getUserId())).thenReturn(Mono.just(visitedLocation));
+        when(gpsUtilServiceMock.getUserLocation(user.getUserId())).thenReturn(visitedLocation);
         assertNotNull(tourGuideService.getUserLocation(user.getUserName()));
         verify(gpsUtilServiceMock, Mockito.times(1)).getUserLocation(user.getUserId());
 
@@ -115,7 +114,7 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 
         VisitedLocationTourGuide visitedLocationMock = new VisitedLocationTourGuide(user.getUserId(), new LocationTourGuide(25.5, 42.6), Date.from(Instant.now()));
-        when(gpsUtilServiceMock.getUserLocation(user.getUserId())).thenReturn(Mono.just(visitedLocationMock));
+        when(gpsUtilServiceMock.getUserLocation(user.getUserId())).thenReturn(visitedLocationMock);
 
         VisitedLocationTourGuide visitedLocationTourGuide = tourGuideService.trackUserLocation(user);
 
@@ -131,8 +130,12 @@ public class TestTourGuideService {
         AttractionTourGuide attractionTourGuide1 = new AttractionTourGuide("att1", "city", "", 15.5, 20.5);
         AttractionTourGuide attractionTourGuide2 = new AttractionTourGuide("att2", "city", "", 25.5, 40.5);
 
-        when(gpsUtilServiceMock.getUserLocation(user.getUserId())).thenReturn(Mono.just(visitedLocationTourGuide));
-        when(gpsUtilServiceMock.getAttractions()).thenReturn(Flux.just(attractionTourGuide1, attractionTourGuide2));
+        List<AttractionTourGuide> attractionTourGuideList = new ArrayList<>();
+        attractionTourGuideList.add(attractionTourGuide1);
+        attractionTourGuideList.add(attractionTourGuide2);
+
+        when(gpsUtilServiceMock.getUserLocation(user.getUserId())).thenReturn(visitedLocationTourGuide);
+        when(gpsUtilServiceMock.getAttractions()).thenReturn(attractionTourGuideList);
         when(rewardsServiceMock.getDistance(any(), any())).thenReturn(25.48);
 
         NearbyAttractionDto nearbyAttractionDto = tourGuideService.getNearByAttractions(visitedLocationTourGuide);

@@ -62,7 +62,7 @@ public class GpsUtilServiceTests {
                 .setBody(objectMapper.writeValueAsString(visitedLocation))
                 .addHeader("Content-Type", "application/json"));
 
-        VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilService.getUserLocation(userId).block();
+        VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilService.getUserLocation(userId);
 
         assertThat(visitedLocationTourGuide).isNotNull();
         assertThat(visitedLocationTourGuide.getUserId()).isEqualTo(userId);
@@ -87,7 +87,7 @@ public class GpsUtilServiceTests {
                 .setBody(objectMapper.writeValueAsString(attractionList))
                 .addHeader("Content-Type", "application/json"));
 
-        List<AttractionTourGuide> attractionTourGuideList = gpsUtilService.getAttractions().collectList().block();
+        List<AttractionTourGuide> attractionTourGuideList = gpsUtilService.getAttractions();
 
         assertThat(attractionTourGuideList).isNotEmpty();
 

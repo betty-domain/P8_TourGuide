@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import reactor.core.publisher.Flux;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
@@ -46,10 +45,14 @@ public class TestRewardsService {
         AttractionTourGuide attractionTourGuide1 = new AttractionTourGuide("att1", "city", "", 15.5, 20.5);
         AttractionTourGuide attractionTourGuide2 = new AttractionTourGuide("att2", "city", "", 25.5, 40.5);
 
-        when(gpsUtilServiceMock.getAttractions()).thenReturn(Flux.just(attractionTourGuide1, attractionTourGuide2));
+        List<AttractionTourGuide> attractionTourGuideList = new ArrayList<>();
+        attractionTourGuideList.add(attractionTourGuide1);
+        attractionTourGuideList.add(attractionTourGuide2);
+
+        when(gpsUtilServiceMock.getAttractions()).thenReturn(attractionTourGuideList);
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        AttractionTourGuide attractionTourGuide = gpsUtilServiceMock.getAttractions().collectList().block().get(0);
+        AttractionTourGuide attractionTourGuide = gpsUtilServiceMock.getAttractions().get(0);
         user.addToVisitedLocations(new VisitedLocationTourGuide(user.getUserId(), attractionTourGuide, new Date()));
 
         rewardsService.calculateRewards(user);
@@ -65,14 +68,18 @@ public class TestRewardsService {
         AttractionTourGuide attractionTourGuide1 = new AttractionTourGuide("att1", "city", "", 15.5, 20.5);
         AttractionTourGuide attractionTourGuide2 = new AttractionTourGuide("att2", "city", "", 25.5, 40.5);
 
-        when(gpsUtilServiceMock.getAttractions()).thenReturn(Flux.just(attractionTourGuide1, attractionTourGuide2));
+        List<AttractionTourGuide> attractionTourGuideList = new ArrayList<>();
+        attractionTourGuideList.add(attractionTourGuide1);
+        attractionTourGuideList.add(attractionTourGuide2);
+
+        when(gpsUtilServiceMock.getAttractions()).thenReturn(attractionTourGuideList);
 
         User user1 = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        AttractionTourGuide attractionTourGuide_user1 = gpsUtilServiceMock.getAttractions().collectList().block().get(0);
+        AttractionTourGuide attractionTourGuide_user1 = gpsUtilServiceMock.getAttractions().get(0);
         user1.addToVisitedLocations(new VisitedLocationTourGuide(user1.getUserId(), attractionTourGuide_user1, new Date()));
 
         User user2 = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        AttractionTourGuide attractionTourGuide_user2 = gpsUtilServiceMock.getAttractions().collectList().block().get(1);
+        AttractionTourGuide attractionTourGuide_user2 = gpsUtilServiceMock.getAttractions().get(1);
         user2.addToVisitedLocations(new VisitedLocationTourGuide(user2.getUserId(), attractionTourGuide_user2, new Date()));
 
         List<User> userList = new ArrayList<>();
@@ -106,7 +113,7 @@ public class TestRewardsService {
         rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
         List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0).getUserName());
 
-        assertEquals(gpsUtilServiceMock.getAttractions().collectList().block().size(), userRewards.size());
+        assertEquals(gpsUtilServiceMock.getAttractions().size(), userRewards.size());
     }
 
 }
