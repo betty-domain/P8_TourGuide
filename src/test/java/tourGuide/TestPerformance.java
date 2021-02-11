@@ -4,6 +4,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
@@ -54,6 +55,7 @@ public class TestPerformance {
 
         rewardsService = new RewardsService(gpsUtilService, new RewardCentralService());
         InternalTestHelper.setInternalUserNumber(100000);
+
         //TODO : voir s'il est possible de désactiver le tracker pour les tests de performance afin d'éviter de faire le même traitement 2 fois en parallèle
         tourGuideService = new TourGuideService(gpsUtilService, rewardsService, new TripPricerService());
         tourGuideService.tracker.stopTracking();
@@ -79,13 +81,9 @@ public class TestPerformance {
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-    @Disabled
     @Test
     public void highVolumeTrackLocationNewPerf() {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-
-        //TODO : voir s'il est possible de remonter cette instructions dans le test ?
-        //tourGuideService.tracker.stopTracking();
 
         List<User> allUsers = new ArrayList<>();
         allUsers = tourGuideService.getAllUsers();
@@ -129,7 +127,6 @@ public class TestPerformance {
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-    @Disabled
     @Test
     public void highVolumeGetRewardsNewPerf() throws Exception {
 
@@ -143,11 +140,11 @@ public class TestPerformance {
         AttractionTourGuide attractionTourGuide = gpsUtilService.getAttractions().get(0);
         List<User> allUsers =  tourGuideService.getAllUsers();
 
-        allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocationTourGuide(u.getUserId(), attractionTourGuide, new Date())));
+        allUsers.stream().forEach(u -> u.addToVisitedLocations(new VisitedLocationTourGuide(u.getUserId(), attractionTourGuide, new Date())));
 
         rewardsService.calculateRewardsForUserList(allUsers);
 
-        allUsers.parallelStream().forEach(user ->  {
+        allUsers.stream().forEach(user ->  {
             assertTrue(user.getUserRewards().size() > 0);
         });
 
