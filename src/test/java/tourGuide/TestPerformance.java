@@ -77,8 +77,7 @@ public class TestPerformance {
         System.out.println("highVolumeTrackLocation: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
-
-
+    
     @Test
     public void highVolumeTrackLocationNewPerf() {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
@@ -124,7 +123,6 @@ public class TestPerformance {
         System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
-
 
     @Test
     public void highVolumeGetRewardsNewPerf() throws Exception {

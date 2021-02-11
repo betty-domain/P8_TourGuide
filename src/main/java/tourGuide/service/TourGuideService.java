@@ -1,5 +1,19 @@
 package tourGuide.service;
 
+import gpsUtil.location.Attraction;
+import gpsUtil.location.Location;
+import gpsUtil.location.VisitedLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import tourGuide.helper.InternalTestHelper;
+import tourGuide.model.AttractionClosestDto;
+import tourGuide.model.NearbyAttractionDto;
+import tourGuide.tracker.Tracker;
+import tourGuide.user.User;
+import tourGuide.user.UserReward;
+import tripPricer.Provider;
+
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -11,28 +25,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
-import tourGuide.helper.InternalTestHelper;
-import tourGuide.model.AttractionClosestDto;
-import tourGuide.model.NearbyAttractionDto;
-import tourGuide.tracker.Tracker;
-import tourGuide.user.User;
-import tourGuide.user.UserReward;
-import tripPricer.Provider;
-import tripPricer.TripPricer;
 
 /**
  * TourGuide Service
@@ -120,7 +117,7 @@ public class TourGuideService {
      * @return list of users
      */
     public List<User> getAllUsers() {
-        return internalUserMap.values().parallelStream().collect(Collectors.toList());
+        return internalUserMap.values().stream().collect(Collectors.toList());
     }
 
     /**
@@ -173,7 +170,7 @@ public class TourGuideService {
         logger.debug("Track user location for user list : nbUsers = " + userList.size());
         ExecutorService trackLocationExecutorService = Executors.newFixedThreadPool(1000);
 
-        userList.parallelStream().forEach(user -> {
+        userList.stream().forEach(user -> {
             Runnable runnableTask = () -> {
 
                 trackUserLocation(user);
@@ -197,28 +194,6 @@ public class TourGuideService {
         }
     }
 
-    //TODO à supprimer après revue avec Alexandre du bon fonctionnement avec Runnable
-    /**
-     * Track user location
-     *
-     * @param user user to track
-     * @return last visitedLocation
-     */
-    public CompletableFuture<VisitedLocation> trackUserLocationNew(User user) {
-
-        ExecutorService executorService = Executors.newFixedThreadPool(1000);
-
-        return CompletableFuture.supplyAsync(() ->
-        {
-            return gpsUtilService.getUserLocation(user.getUserId());
-        }, executorService).
-                thenApply(visitedLocation -> {
-                            user.addToVisitedLocations(visitedLocation);
-                            rewardsService.calculateRewards(user);
-                            return visitedLocation;
-                        }
-                );
-    }
 
     /**
      * Return Top 5 attractions nearest to user
@@ -231,7 +206,7 @@ public class TourGuideService {
 
         List<Attraction> attractionList = gpsUtilService.getAttractions();
 
-        attractionList.parallelStream().forEach(attraction ->
+        attractionList.stream().forEach(attraction ->
                 {
                     AttractionClosestDto attractionClosestDto = new AttractionClosestDto(attraction.attractionName, attraction,
                             rewardsService.getDistance(attraction, visitedLocation.location), rewardsService.getRewardPoints(attraction, visitedLocation.userId));
@@ -242,7 +217,7 @@ public class TourGuideService {
 
         NearbyAttractionDto nearbyAttractionDto = new NearbyAttractionDto();
         nearbyAttractionDto.setUserLocation(visitedLocation.location);
-        nearbyAttractionDto.setClosestAttractionsList(attractionClosestDtoList.parallelStream().sorted(Comparator.comparingDouble(AttractionClosestDto::getDistanceUserToAttraction)).limit(5).collect(Collectors.toList()));
+        nearbyAttractionDto.setClosestAttractionsList(attractionClosestDtoList.stream().sorted(Comparator.comparingDouble(AttractionClosestDto::getDistanceUserToAttraction)).limit(5).collect(Collectors.toList()));
 
         return nearbyAttractionDto;
     }

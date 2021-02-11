@@ -74,7 +74,6 @@ public class RewardsService {
         logger.debug("User nb visitedLocation : " + userLocationsCopied.size());
         List<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
 
-        //utilisation de parallelStream pour accélérer le traitement
         userLocationsCopied.stream().forEach(visitedLocation ->
                 {
                     attractions.stream().forEach(attraction -> {
