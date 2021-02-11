@@ -9,10 +9,8 @@ import org.springframework.stereotype.Service;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -77,10 +75,10 @@ public class RewardsService {
         List<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
 
         //utilisation de parallelStream pour accélérer le traitement
-        userLocationsCopied.parallelStream().forEach(visitedLocation ->
+        userLocationsCopied.stream().forEach(visitedLocation ->
                 {
-                    attractions.parallelStream().forEach(attraction -> {
-                        if (user.getUserRewards().parallelStream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
+                    attractions.stream().forEach(attraction -> {
+                        if (user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
                             if (nearAttraction(visitedLocation, attraction)) {
                                 user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user.getUserId())));
                             }
@@ -98,9 +96,9 @@ public class RewardsService {
     public void calculateRewardsForUserList(List<User> userList) {
         logger.debug("Calculate Rewards for user list : nbUsers = " + userList.size());
 
-        ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(2000);
+        ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(1000);
 
-        userList.parallelStream().forEach(user -> {
+        userList.stream().forEach(user -> {
             Runnable runnableTask = () -> {
 
                 calculateRewards(user);
@@ -123,40 +121,6 @@ public class RewardsService {
             rewardsExecutorService.shutdownNow();
         }
     }
-
-    //TODO : à supprimer après revue avec Alexandre du bon fonctionnement de Runnable
-    public void calculateRewardsNew(User user) {
-
-        ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(1500);
-
-
-        //copy list of userLocations to avoid change of elements in this list during iterations on the list
-        List<VisitedLocation> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
-        List<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
-
-        List<CompletableFuture<Void>> completableFutures = new ArrayList<>();
-
-        logger.debug("User nb visitedLocation : " + userLocationsCopied.size());
-
-        //utilisation de parallelStream pour accélérer le traitement
-        for (VisitedLocation visitedLocation : userLocationsCopied) {
-            for (Attraction attraction : attractions) {
-                if (user.getUserRewards().parallelStream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
-                    if (nearAttraction(visitedLocation, attraction)) {
-                        completableFutures.add(
-                                CompletableFuture.runAsync(() -> {
-                                    user.addUserReward(new UserReward(visitedLocation, attraction, this.getRewardPoints(attraction, user.getUserId())));
-                                }, rewardsExecutorService)
-                        );
-                    }
-                }
-            }
-        }
-
-        completableFutures.parallelStream().forEach(voidCompletableFuture -> voidCompletableFuture.join());
-
-    }
-
 
     /**
      * Check if a given location is in Attraction Proximity

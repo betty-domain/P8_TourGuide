@@ -54,7 +54,7 @@ public class TestPerformance {
 
         rewardsService = new RewardsService(gpsUtilService, new RewardCentralService());
         InternalTestHelper.setInternalUserNumber(100000);
-        //TODO : voir s'il est possible de désactiver le tracker pour les tests de performance afin d'éviter de faire le même traitement 2 fois en parallèle
+
         tourGuideService = new TourGuideService(gpsUtilService, rewardsService, new TripPricerService(),false);
     }
 
@@ -82,9 +82,6 @@ public class TestPerformance {
     @Test
     public void highVolumeTrackLocationNewPerf() {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-
-        //TODO : voir s'il est possible de remonter cette instructions dans le test ?
-        //tourGuideService.tracker.stopTracking();
 
         List<User> allUsers = new ArrayList<>();
         allUsers = tourGuideService.getAllUsers();
@@ -137,16 +134,14 @@ public class TestPerformance {
         stopWatch.start();
         System.out.println("Start StopWatch");
 
-        //tourGuideService.tracker.stopTracking();
-
         Attraction attraction = gpsUtilService.getAttractions().get(0);
         List<User> allUsers =  tourGuideService.getAllUsers();
 
-        allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
+        allUsers.stream().forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
         rewardsService.calculateRewardsForUserList(allUsers);
 
-        allUsers.parallelStream().forEach(user ->  {
+        allUsers.stream().forEach(user ->  {
             assertTrue(user.getUserRewards().size() > 0);
         });
 
