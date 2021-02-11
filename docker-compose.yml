@@ -1,0 +1,28 @@
+version : "3.8"
+services :
+  tourGuide :
+    image : tourguide-docker
+    ports :
+      - "127.0.0.1:8100:8100"
+    depends_on:
+      gpsUtil:
+        condition: service_started
+      rewardsCentral:
+        condition: service_started
+      tripPricer:
+        condition: service_started
+
+  gpsUtil:
+    image : gpsutil-docker
+    ports :
+      - "127.0.0.1:8101:8101"
+
+  rewardsCentral:
+    image: rewardscentral-docker
+    ports :
+      - "127.0.0.1:8102:8102"
+
+  tripPricer :
+    image : trippricer-docker
+    ports:
+      - "127.0.0.1:8103:8103"
