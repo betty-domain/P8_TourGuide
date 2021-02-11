@@ -1,5 +1,14 @@
 package tourGuide.service;
 
+import gpsUtil.location.Attraction;
+import gpsUtil.location.Location;
+import gpsUtil.location.VisitedLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import tourGuide.user.User;
+import tourGuide.user.UserReward;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -8,16 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
-import tourGuide.user.User;
-import tourGuide.user.UserReward;
 
 /**
  * Rewards Service
@@ -99,7 +98,7 @@ public class RewardsService {
     public void calculateRewardsForUserList(List<User> userList) {
         logger.debug("Calculate Rewards for user list : nbUsers = " + userList.size());
 
-        ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(1500);
+        ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(2000);
 
         userList.parallelStream().forEach(user -> {
             Runnable runnableTask = () -> {
