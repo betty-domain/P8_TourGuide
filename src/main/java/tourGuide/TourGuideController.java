@@ -2,12 +2,15 @@ package tourGuide;
 
 import com.jsoniter.output.JsonStream;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tourGuide.model.Provider;
 import tourGuide.model.VisitedLocationTourGuide;
 import tourGuide.service.TourGuideService;
+import tourGuide.user.UserPreferences;
 
 import java.util.List;
 
@@ -96,5 +99,11 @@ public class TourGuideController {
     public String getTripDeals(@RequestParam String userName) {
         List<Provider> providers = tourGuideService.getTripDeals(userName);
         return JsonStream.serialize(providers);
+    }
+
+    @PostMapping("/userPreferences")
+    public UserPreferences setUSerPreferences(@RequestParam String userName, @RequestBody UserPreferences userPreferences)
+    {
+        return tourGuideService.setUserPreferences(userName,userPreferences);
     }
 }

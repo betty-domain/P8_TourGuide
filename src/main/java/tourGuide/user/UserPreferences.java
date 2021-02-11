@@ -1,9 +1,10 @@
 package tourGuide.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.javamoney.moneta.Money;
+
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
-
-import org.javamoney.moneta.Money;
 
 
 public class UserPreferences {
@@ -38,7 +39,8 @@ public class UserPreferences {
 	public int getAttractionProximity() {
 		return attractionProximity;
 	}
-	
+
+	@JsonIgnore
 	public Money getLowerPricePoint() {
 		return lowerPricePoint;
 	}
@@ -47,6 +49,7 @@ public class UserPreferences {
 		this.lowerPricePoint = lowerPricePoint;
 	}
 
+	@JsonIgnore
 	public Money getHighPricePoint() {
 		return highPricePoint;
 	}

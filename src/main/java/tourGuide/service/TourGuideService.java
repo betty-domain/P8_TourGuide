@@ -4,9 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tourGuide.helper.InternalTestHelper;
-
-import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.AttractionClosestDto;
+import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.LocationTourGuide;
 import tourGuide.model.NearbyAttractionDto;
 import tourGuide.model.Provider;
@@ -28,8 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -126,6 +123,26 @@ public class TourGuideService {
     }
 
     /**
+     * set UserPreferences to given user
+     * @param username username
+     * @param userPreferences userPreferences
+     * @return userPreferences or null if user doesn't exist
+     */
+    public UserPreferences setUserPreferences(String username, UserPreferences userPreferences)
+    {
+        User user = getUser(username);
+
+        if( user!=null)
+        {
+            user.setUserPreferences(userPreferences);
+            return user.getUserPreferences();
+        }
+        return null;
+
+
+    }
+
+    /**
      * get trip deals for user
      *
      * @param username username
@@ -151,7 +168,9 @@ public class TourGuideService {
     public VisitedLocationTourGuide trackUserLocation(User user) {
         VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilService.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocationTourGuide);
+        List<UserReward> userRewards = user.getUserRewards();
         rewardsService.calculateRewards(user);
+
         return visitedLocationTourGuide;
     }
 
