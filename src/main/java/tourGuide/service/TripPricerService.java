@@ -20,7 +20,7 @@ public class TripPricerService {
 
     private final Logger logger = LoggerFactory.getLogger(TripPricerService.class);
 
-    private static final String defaultTripPricerRootUrl = "http://localhost:8103";
+    private static final String defaultTripPricerRootUrl = "http://tripPricer:8103";
 
     public static final String priceEndpoint = "/price";
 

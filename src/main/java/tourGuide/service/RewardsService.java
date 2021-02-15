@@ -9,7 +9,6 @@ import tourGuide.model.VisitedLocationTourGuide;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -72,7 +71,6 @@ public class RewardsService {
 
         //copy list of userLocations to avoid change of elements in this list during iterations on the list
         List<VisitedLocationTourGuide> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
-        logger.debug("User nb visitedLocation : " + userLocationsCopied.size());
         List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
 
         userLocationsCopied.stream().forEach(visitedLocation ->

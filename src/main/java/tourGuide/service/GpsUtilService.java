@@ -20,7 +20,7 @@ public class GpsUtilService {
     private final Logger logger = LoggerFactory.getLogger(GpsUtilService.class);
 
 
-    private static final String defaultGpsUtilRootUrl = "http://localhost:8101";
+    private static final String defaultGpsUtilRootUrl = "http://gpsUtil:8101";
 
     public static final String attractionsEndpoint = "/attractions";
 

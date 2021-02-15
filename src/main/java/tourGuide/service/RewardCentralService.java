@@ -14,7 +14,7 @@ import java.util.UUID;
 public class RewardCentralService {
     private final Logger logger = LoggerFactory.getLogger(RewardCentralService.class);
 
-    private static final String defaultRewardsCentralRootUrl = "http://localhost:8102";
+    private static final String defaultRewardsCentralRootUrl = "http://rewardsCentral:8102";
 
     public static final String attractionsRewardsEndpoint = "/rewardsPoints";
 
