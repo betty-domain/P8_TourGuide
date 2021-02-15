@@ -40,7 +40,6 @@ public class TourGuideModule {
     public TourGuideService getTourGuideService()
     {
         TourGuideService tourGuideService =  new TourGuideService(getGpsUtilService(),getRewardsService(), getTripPricerService());
-        tourGuideService.tracker.startTracking();
         return tourGuideService;
     }
 

@@ -1,17 +1,13 @@
 package tourGuide;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
 import tourGuide.service.GpsUtilService;
 import tourGuide.service.RewardCentralService;
 import tourGuide.service.RewardsService;
-import tourGuide.service.TourGuideService;
-import tourGuide.service.TripPricerService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
@@ -102,22 +98,6 @@ public class TestRewardsService {
     public void isWithinAttractionProximity() {
         AttractionTourGuide attractionTourGuide = new AttractionTourGuide("attractionName", "city", "state", 15.5, 25.5);
         assertTrue(rewardsService.isWithinAttractionProximity(attractionTourGuide, attractionTourGuide));
-    }
-
-    @Disabled
-    @Test
-    public void nearAllAttractions() {
-
-        rewardsService.setProximityBuffer(Integer.MAX_VALUE);
-
-        InternalTestHelper.setInternalUserNumber(1);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtilServiceMock, rewardsService, new TripPricerService());
-        tourGuideService.tracker.startTracking();
-
-        rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
-        List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0).getUserName());
-
-        assertEquals(gpsUtilServiceMock.getAttractions().size(), userRewards.size());
     }
 
 }
