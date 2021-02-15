@@ -46,6 +46,7 @@ public class TestTourGuideService {
     public void setUp() {
         InternalTestHelper.setInternalUserNumber(0);
         tourGuideService = new TourGuideService(gpsUtilServiceMock, rewardsServiceMock, tripPricerServiceMock);
+        tourGuideService.tracker.stopTracking();
     }
 
     @Test

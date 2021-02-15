@@ -2,7 +2,6 @@ package tourGuide.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionClosestDto;
 import tourGuide.model.AttractionTourGuide;
@@ -37,7 +36,6 @@ import java.util.stream.IntStream;
 /**
  * TourGuide Service
  */
-@Service
 public class TourGuideService {
     private final Logger logger = LoggerFactory.getLogger(TourGuideService.class);
     private final GpsUtilService gpsUtilService;
