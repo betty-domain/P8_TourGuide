@@ -2,14 +2,12 @@ package tourGuide.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.LocationTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -20,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Rewards Service
  */
-@Service
 public class RewardsService {
 
     private final Logger logger = LoggerFactory.getLogger(RewardsService.class);
@@ -72,7 +69,6 @@ public class RewardsService {
 
         //copy list of userLocations to avoid change of elements in this list during iterations on the list
         List<VisitedLocationTourGuide> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
-        logger.debug("User nb visitedLocation : " + userLocationsCopied.size());
         List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
 
         userLocationsCopied.stream().forEach(visitedLocation ->

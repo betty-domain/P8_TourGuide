@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
@@ -15,7 +14,6 @@ import java.util.UUID;
 /**
  * GpsUtil Service class
  */
-@Service
 public class GpsUtilService {
     private final Logger logger = LoggerFactory.getLogger(GpsUtilService.class);
 

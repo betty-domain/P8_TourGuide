@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import tourGuide.model.Provider;
 
@@ -15,7 +14,6 @@ import java.util.UUID;
 /**
  * TripPricer Service class
  */
-@Service
 public class TripPricerService {
 
     private final Logger logger = LoggerFactory.getLogger(TripPricerService.class);
