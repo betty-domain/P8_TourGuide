@@ -9,8 +9,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
-public class RewardCentralService {
-    private final Logger logger = LoggerFactory.getLogger(RewardCentralService.class);
+public class RewardCentralServiceWebClient implements IRewardCentralService {
+    private final Logger logger = LoggerFactory.getLogger(RewardCentralServiceWebClient.class);
 
     private static final String defaultRewardsCentralRootUrl = "http://localhost:8102";
 
@@ -21,12 +21,12 @@ public class RewardCentralService {
     /**
      * Constructor of service
      */
-    public RewardCentralService()
+    public RewardCentralServiceWebClient()
     {
         this(defaultRewardsCentralRootUrl);
     }
 
-    public RewardCentralService(String rewardsCentralRootUrl)
+    public RewardCentralServiceWebClient(String rewardsCentralRootUrl)
     {
         webClient = WebClient.builder().baseUrl(rewardsCentralRootUrl).
                 defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).

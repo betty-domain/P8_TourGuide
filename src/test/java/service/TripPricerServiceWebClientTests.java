@@ -7,9 +7,10 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import tourGuide.model.Provider;
-import tourGuide.service.TripPricerService;
+import tourGuide.service.tripPricer.TripPricerServiceWebClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,10 +20,11 @@ import java.util.UUID;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
+@Disabled
 public class TripPricerServiceTests {
 
     public static MockWebServer mockBackEnd;
-    private TripPricerService tripPricerService;
+    private TripPricerServiceWebClient tripPricerService;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
@@ -42,7 +44,7 @@ public class TripPricerServiceTests {
         String baseUrl = String.format("http://localhost:%s",
                 mockBackEnd.getPort());
 
-        tripPricerService = new TripPricerService(baseUrl);
+        tripPricerService = new TripPricerServiceWebClient(baseUrl);
 
     }
 
@@ -66,7 +68,7 @@ public class TripPricerServiceTests {
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
 
         assertEquals("GET", recordedRequest.getMethod());
-        assertThat(recordedRequest.getPath()).contains(TripPricerService.priceEndpoint);
+        assertThat(recordedRequest.getPath()).contains(TripPricerServiceWebClient.priceEndpoint);
 
     }
 
@@ -85,7 +87,7 @@ public class TripPricerServiceTests {
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
 
         assertEquals("GET", recordedRequest.getMethod());
-        assertThat(recordedRequest.getPath()).contains(TripPricerService.providerNameEndpoint);
+        assertThat(recordedRequest.getPath()).contains(TripPricerServiceWebClient.providerNameEndpoint);
 
     }
 }

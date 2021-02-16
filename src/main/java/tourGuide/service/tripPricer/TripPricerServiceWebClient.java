@@ -14,7 +14,7 @@ import java.util.UUID;
 /**
  * TripPricer Service class
  */
-public class TripPricerService {
+public class TripPricerService implements ITripPricerService{
 
     private final Logger logger = LoggerFactory.getLogger(TripPricerService.class);
 

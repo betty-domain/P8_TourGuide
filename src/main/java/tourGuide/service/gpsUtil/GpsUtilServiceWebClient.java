@@ -14,8 +14,8 @@ import java.util.UUID;
 /**
  * GpsUtil Service class
  */
-public class GpsUtilService {
-    private final Logger logger = LoggerFactory.getLogger(GpsUtilService.class);
+public class GpsUtilServiceWebClient implements IGpsUtilService {
+    private final Logger logger = LoggerFactory.getLogger(GpsUtilServiceWebClient.class);
 
 
     private static final String defaultGpsUtilRootUrl = "http://localhost:8101";
@@ -30,7 +30,7 @@ public class GpsUtilService {
     /**
      * Constructor that initialize a new gpsUtil class
      */
-    public GpsUtilService()
+    public GpsUtilServiceWebClient()
     {
         this(defaultGpsUtilRootUrl);
     }
@@ -39,7 +39,7 @@ public class GpsUtilService {
      * Constructor with gopsUtilRoot url in param
      * @param gpsUtilRootUrl rootUrl for gpsUtil api
      */
-    public GpsUtilService(String gpsUtilRootUrl)
+    public GpsUtilServiceWebClient(String gpsUtilRootUrl)
     {
         webClient = WebClient.builder().baseUrl(gpsUtilRootUrl).
                 defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).
