@@ -1,4 +1,4 @@
-package tourGuide.service;
+package tourGuide.service.tripPricer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +14,9 @@ import java.util.UUID;
 /**
  * TripPricer Service class
  */
-public class TripPricerService {
+public class TripPricerServiceWebClient implements ITripPricerService {
 
-    private final Logger logger = LoggerFactory.getLogger(TripPricerService.class);
-
-    private static final String defaultTripPricerRootUrl = "http://tripPricer:8103";
+    private final Logger logger = LoggerFactory.getLogger(TripPricerServiceWebClient.class);
 
     public static final String priceEndpoint = "/price";
 
@@ -29,12 +27,12 @@ public class TripPricerService {
     /**
      * Constructor of TripPricer Service
      */
-    public TripPricerService()
+    public TripPricerServiceWebClient()
     {
         this(defaultTripPricerRootUrl);
     }
 
-    public TripPricerService(String tripPricerRootUrl)
+    public TripPricerServiceWebClient(String tripPricerRootUrl)
     {
         webClient = WebClient.builder().baseUrl(tripPricerRootUrl).
                 defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tourGuide.service.RewardCentralService;
+import tourGuide.service.rewardCentral.RewardCentralServiceWebClient;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -16,10 +16,10 @@ import java.util.UUID;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
-public class RewardCentralServiceTest {
+public class RewardCentralServiceWebClientTest {
 
     public static MockWebServer mockBackEnd;
-    private RewardCentralService rewardCentralService;
+    private RewardCentralServiceWebClient rewardCentralService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
@@ -39,7 +39,7 @@ public class RewardCentralServiceTest {
         String baseUrl = String.format("http://localhost:%s",
                 mockBackEnd.getPort());
 
-        rewardCentralService = new RewardCentralService(baseUrl);
+        rewardCentralService = new RewardCentralServiceWebClient(baseUrl);
 
     }
 
@@ -60,6 +60,6 @@ public class RewardCentralServiceTest {
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
 
         assertEquals("GET", recordedRequest.getMethod());
-        assertEquals(RewardCentralService.attractionsRewardsEndpoint + "?attractionId="+attractionId.toString()+"&userId="+userId, recordedRequest.getPath());
+        assertEquals(RewardCentralServiceWebClient.attractionsRewardsEndpoint + "?attractionId="+attractionId.toString()+"&userId="+userId, recordedRequest.getPath());
     }
 }

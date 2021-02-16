@@ -1,7 +1,6 @@
 package service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.LocationTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
-import tourGuide.service.GpsUtilService;
+import tourGuide.service.gpsUtil.GpsUtilServiceWebClient;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -24,10 +23,10 @@ import java.util.UUID;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
-public class GpsUtilServiceTests {
+public class GpsUtilServiceWebClientTests {
 
     public static MockWebServer mockBackEnd;
-    private GpsUtilService gpsUtilService;
+    private GpsUtilServiceWebClient gpsUtilServiceWebClient;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
@@ -47,7 +46,7 @@ public class GpsUtilServiceTests {
         String baseUrl = String.format("http://localhost:%s",
                 mockBackEnd.getPort());
 
-        gpsUtilService = new GpsUtilService(baseUrl);
+        gpsUtilServiceWebClient = new GpsUtilServiceWebClient(baseUrl);
 
     }
 
@@ -62,7 +61,7 @@ public class GpsUtilServiceTests {
                 .setBody(objectMapper.writeValueAsString(visitedLocation))
                 .addHeader("Content-Type", "application/json"));
 
-        VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilService.getUserLocation(userId);
+        VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilServiceWebClient.getUserLocation(userId);
 
         assertThat(visitedLocationTourGuide).isNotNull();
         assertThat(visitedLocationTourGuide.getUserId()).isEqualTo(userId);
@@ -70,7 +69,7 @@ public class GpsUtilServiceTests {
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
 
         assertEquals("GET", recordedRequest.getMethod());
-        assertEquals(GpsUtilService.userLocationEndpoint + "?userId="+userId, recordedRequest.getPath());
+        assertEquals(GpsUtilServiceWebClient.userLocationEndpoint + "?userId="+userId, recordedRequest.getPath());
     }
 
     @Test
@@ -87,14 +86,14 @@ public class GpsUtilServiceTests {
                 .setBody(objectMapper.writeValueAsString(attractionList))
                 .addHeader("Content-Type", "application/json"));
 
-        List<AttractionTourGuide> attractionTourGuideList = gpsUtilService.getAttractions();
+        List<AttractionTourGuide> attractionTourGuideList = gpsUtilServiceWebClient.getAttractions();
 
         assertThat(attractionTourGuideList).isNotEmpty();
 
         RecordedRequest recordedRequest = mockBackEnd.takeRequest();
 
         assertEquals("GET", recordedRequest.getMethod());
-        assertEquals( GpsUtilService.attractionsEndpoint, recordedRequest.getPath());
+        assertEquals( GpsUtilServiceWebClient.attractionsEndpoint, recordedRequest.getPath());
 
     }
 }

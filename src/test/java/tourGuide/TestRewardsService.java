@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
-import tourGuide.service.GpsUtilService;
-import tourGuide.service.RewardCentralService;
+import tourGuide.service.gpsUtil.IGpsUtilService;
+import tourGuide.service.rewardCentral.IRewardCentralService;
 import tourGuide.service.RewardsService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
@@ -25,9 +25,9 @@ public class TestRewardsService {
 
     private RewardsService rewardsService;
 
-    private RewardCentralService rewardCentralServiceMock = Mockito.mock(RewardCentralService.class);
+    private IRewardCentralService rewardCentralServiceMock = Mockito.mock(IRewardCentralService.class);
 
-    private GpsUtilService gpsUtilServiceMock = Mockito.mock(GpsUtilService.class);
+    private IGpsUtilService gpsUtilServiceMock = Mockito.mock(IGpsUtilService.class);
 
     @BeforeEach
     public void setUp() {

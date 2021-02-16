@@ -2,31 +2,33 @@ package tourGuide;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import tourGuide.service.GpsUtilService;
-import tourGuide.service.RewardCentralService;
+import tourGuide.service.gpsUtil.GpsUtilServiceRestTemplate;
+import tourGuide.service.gpsUtil.IGpsUtilService;
+import tourGuide.service.rewardCentral.IRewardCentralService;
+import tourGuide.service.tripPricer.ITripPricerService;
+import tourGuide.service.rewardCentral.RewardCentralServiceRestTemplate;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
-import tourGuide.service.TripPricerService;
+import tourGuide.service.tripPricer.TripPricerServiceRestTemplate;
 
 @Configuration
 public class TourGuideModule {
 
 
     @Bean
-    public TripPricerService getTripPricerService()
+    public ITripPricerService getTripPricerService()
     {
-        return  new TripPricerService();
+        return  new TripPricerServiceRestTemplate();
     }
 
 	@Bean
-	public GpsUtilService getGpsUtilService() {
-		return new GpsUtilService();
+	public IGpsUtilService getGpsUtilService() {
+		return new GpsUtilServiceRestTemplate();
 	}
 
     @Bean
-    public RewardCentralService getRewardCentralService() {
-        return new RewardCentralService();
+    public IRewardCentralService getRewardCentralService() {
+        return new RewardCentralServiceRestTemplate();
     }
 
 
@@ -39,8 +41,7 @@ public class TourGuideModule {
     @Bean
     public TourGuideService getTourGuideService()
     {
-        TourGuideService tourGuideService =  new TourGuideService(getGpsUtilService(),getRewardsService(), getTripPricerService());
-        return tourGuideService;
+        return new TourGuideService(getGpsUtilService(),getRewardsService(), getTripPricerService());
     }
 
 

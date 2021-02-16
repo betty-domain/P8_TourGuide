@@ -1,4 +1,4 @@
-package tourGuide.service;
+package tourGuide.service.gpsUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +14,9 @@ import java.util.UUID;
 /**
  * GpsUtil Service class
  */
-public class GpsUtilService {
-    private final Logger logger = LoggerFactory.getLogger(GpsUtilService.class);
 
-
-    private static final String defaultGpsUtilRootUrl = "http://gpsUtil:8101";
+public class GpsUtilServiceWebClient implements IGpsUtilService {
+    private final Logger logger = LoggerFactory.getLogger(GpsUtilServiceWebClient.class);
 
     public static final String attractionsEndpoint = "/attractions";
 
@@ -30,7 +28,7 @@ public class GpsUtilService {
     /**
      * Constructor that initialize a new gpsUtil class
      */
-    public GpsUtilService()
+    public GpsUtilServiceWebClient()
     {
         this(defaultGpsUtilRootUrl);
     }
@@ -39,7 +37,7 @@ public class GpsUtilService {
      * Constructor with gopsUtilRoot url in param
      * @param gpsUtilRootUrl rootUrl for gpsUtil api
      */
-    public GpsUtilService(String gpsUtilRootUrl)
+    public GpsUtilServiceWebClient(String gpsUtilRootUrl)
     {
         webClient = WebClient.builder().baseUrl(gpsUtilRootUrl).
                 defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).

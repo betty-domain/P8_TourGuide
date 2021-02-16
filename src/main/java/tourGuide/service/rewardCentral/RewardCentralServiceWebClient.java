@@ -1,4 +1,4 @@
-package tourGuide.service;
+package tourGuide.service.rewardCentral;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +9,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
-public class RewardCentralService {
-    private final Logger logger = LoggerFactory.getLogger(RewardCentralService.class);
-
-    private static final String defaultRewardsCentralRootUrl = "http://rewardsCentral:8102";
+public class RewardCentralServiceWebClient implements IRewardCentralService {
+    private final Logger logger = LoggerFactory.getLogger(RewardCentralServiceWebClient.class);
 
     public static final String attractionsRewardsEndpoint = "/rewardsPoints";
 
@@ -21,12 +19,12 @@ public class RewardCentralService {
     /**
      * Constructor of service
      */
-    public RewardCentralService()
+    public RewardCentralServiceWebClient()
     {
         this(defaultRewardsCentralRootUrl);
     }
 
-    public RewardCentralService(String rewardsCentralRootUrl)
+    public RewardCentralServiceWebClient(String rewardsCentralRootUrl)
     {
         webClient = WebClient.builder().baseUrl(rewardsCentralRootUrl).
                 defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).

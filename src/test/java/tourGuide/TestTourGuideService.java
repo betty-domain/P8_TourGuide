@@ -11,10 +11,10 @@ import tourGuide.model.NearbyAttractionDto;
 import tourGuide.model.Provider;
 import tourGuide.model.UserCurrentLocationDto;
 import tourGuide.model.VisitedLocationTourGuide;
-import tourGuide.service.GpsUtilService;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
-import tourGuide.service.TripPricerService;
+import tourGuide.service.gpsUtil.IGpsUtilService;
+import tourGuide.service.tripPricer.ITripPricerService;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
 
@@ -36,11 +36,11 @@ public class TestTourGuideService {
 
     private TourGuideService tourGuideService;
 
-    private final GpsUtilService gpsUtilServiceMock = Mockito.mock(GpsUtilService.class);
+    private final IGpsUtilService gpsUtilServiceMock = Mockito.mock(IGpsUtilService.class);
 
     private final RewardsService rewardsServiceMock = Mockito.mock(RewardsService.class);
 
-    private final TripPricerService tripPricerServiceMock = Mockito.mock(TripPricerService.class);
+    private final ITripPricerService tripPricerServiceMock = Mockito.mock(ITripPricerService.class);
 
     @BeforeEach
     public void setUp() {
