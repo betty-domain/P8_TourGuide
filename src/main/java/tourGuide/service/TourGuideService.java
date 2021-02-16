@@ -10,6 +10,8 @@ import tourGuide.model.NearbyAttractionDto;
 import tourGuide.model.Provider;
 import tourGuide.model.UserCurrentLocationDto;
 import tourGuide.model.VisitedLocationTourGuide;
+import tourGuide.service.gpsUtil.IGpsUtilService;
+import tourGuide.service.tripPricer.ITripPricerService;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
@@ -38,9 +40,9 @@ import java.util.stream.IntStream;
  */
 public class TourGuideService {
     private final Logger logger = LoggerFactory.getLogger(TourGuideService.class);
-    private final GpsUtilService gpsUtilService;
+    private final IGpsUtilService gpsUtilService;
     private final RewardsService rewardsService;
-    private final TripPricerService tripPricerService;
+    private final ITripPricerService tripPricerService;
     public final Tracker tracker;
     boolean testMode = true;
 
@@ -51,7 +53,7 @@ public class TourGuideService {
      * @param rewardsService    rewards Service
      * @param tripPricerService tripPricer service
      */
-    public TourGuideService(GpsUtilService gpsUtilService, RewardsService rewardsService, TripPricerService tripPricerService) {
+    public TourGuideService(IGpsUtilService gpsUtilService, RewardsService rewardsService, ITripPricerService tripPricerService) {
         this.gpsUtilService = gpsUtilService;
         this.rewardsService = rewardsService;
         this.tripPricerService = tripPricerService;
@@ -122,21 +124,19 @@ public class TourGuideService {
 
     /**
      * set UserPreferences to given user
-     * @param username username
+     *
+     * @param username        username
      * @param userPreferences userPreferences
      * @return userPreferences or null if user doesn't exist
      */
-    public UserPreferences setUserPreferences(String username, UserPreferences userPreferences)
-    {
+    public UserPreferences setUserPreferences(String username, UserPreferences userPreferences) {
         User user = getUser(username);
 
-        if( user!=null)
-        {
+        if (user != null) {
             user.setUserPreferences(userPreferences);
             return user.getUserPreferences();
         }
         return null;
-
 
     }
 
@@ -151,10 +151,12 @@ public class TourGuideService {
         User user = this.getUser(username);
 
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
+
         List<Provider> providers = tripPricerService.getPrice(TRIP_PRICER_API_KEY, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
                 user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
         user.setTripDeals(providers);
         return providers;
+
     }
 
     /**
@@ -164,29 +166,30 @@ public class TourGuideService {
      * @return last visitedLocation
      */
     public VisitedLocationTourGuide trackUserLocation(User user) {
-        VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilService.getUserLocation(user.getUserId());
-        user.addToVisitedLocations(visitedLocationTourGuide);
-        List<UserReward> userRewards = user.getUserRewards();
-        rewardsService.calculateRewards(user);
 
+        VisitedLocationTourGuide visitedLocationTourGuide = gpsUtilService.getUserLocation(user.getUserId());
+        if (visitedLocationTourGuide != null) {
+            user.addToVisitedLocations(visitedLocationTourGuide);
+            rewardsService.calculateRewards(user);
+        }
         return visitedLocationTourGuide;
     }
 
     /**
      * Track user location for list of users
+     *
      * @param userList list of user to track
      */
-    public void trackUserLocationForUserList(List<User> userList)
-    {
+    public void trackUserLocationForUserList(List<User> userList) {
         logger.debug("Track user location for user list : nbUsers = " + userList.size());
-        ExecutorService trackLocationExecutorService = Executors.newFixedThreadPool(1000);
+        ExecutorService trackLocationExecutorService = Executors.newFixedThreadPool(1500);
 
         userList.stream().forEach(user -> {
             Runnable runnableTask = () -> {
 
                 trackUserLocation(user);
             };
-            trackLocationExecutorService.execute(runnableTask);
+            trackLocationExecutorService.submit(runnableTask);
         });
 
         trackLocationExecutorService.shutdown();
@@ -205,7 +208,6 @@ public class TourGuideService {
         }
     }
 
-
     /**
      * Return Top 5 attractions nearest to user
      *
@@ -214,41 +216,43 @@ public class TourGuideService {
      */
     public NearbyAttractionDto getNearByAttractions(VisitedLocationTourGuide visitedLocationTourGuide) {
         List<AttractionClosestDto> attractionClosestDtoList = new ArrayList<>();
-
         List<AttractionTourGuide> attractionTourGuideList = gpsUtilService.getAttractions();
+        if (attractionTourGuideList!=null) {
+            attractionTourGuideList.stream().forEach(attraction ->
+                    {
+                        AttractionClosestDto attractionClosestDto = new AttractionClosestDto(attraction.getAttractionName(), attraction,
+                                rewardsService.getDistance(attraction, visitedLocationTourGuide.getLocationTourGuide()), rewardsService.getRewardPoints(attraction, visitedLocationTourGuide.getUserId()));
+                        attractionClosestDtoList.add(attractionClosestDto);
 
-        attractionTourGuideList.stream().forEach(attraction ->
-                {
-                    AttractionClosestDto attractionClosestDto = new AttractionClosestDto(attraction.getAttractionName(), attraction,
-                            rewardsService.getDistance(attraction, visitedLocationTourGuide.getLocationTourGuide()), rewardsService.getRewardPoints(attraction, visitedLocationTourGuide.getUserId()));
+                    }
+            );
 
-                    attractionClosestDtoList.add(attractionClosestDto);
-                }
-        );
+            NearbyAttractionDto nearbyAttractionDto = new NearbyAttractionDto();
+            nearbyAttractionDto.setUserLocationTourGuide(visitedLocationTourGuide.getLocationTourGuide());
+            nearbyAttractionDto.setClosestAttractionsList(attractionClosestDtoList.stream().sorted(Comparator.comparingDouble(AttractionClosestDto::getDistanceUserToAttraction)).limit(5).collect(Collectors.toList()));
 
-        NearbyAttractionDto nearbyAttractionDto = new NearbyAttractionDto();
-
-        nearbyAttractionDto.setUserLocationTourGuide(visitedLocationTourGuide.getLocationTourGuide());
-        nearbyAttractionDto.setClosestAttractionsList(attractionClosestDtoList.stream().sorted(Comparator.comparingDouble(AttractionClosestDto::getDistanceUserToAttraction)).limit(5).collect(Collectors.toList()));
-
-        return nearbyAttractionDto;
+            return nearbyAttractionDto;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /**
      * Get a list of every user's most recent location
+     *
      * @return list of all user's last visited location
      */
-    public List<UserCurrentLocationDto> getAllUsersCurrentLocation()
-    {
+    public List<UserCurrentLocationDto> getAllUsersCurrentLocation() {
         List<User> userList = this.getAllUsers();
 
-
-        List<UserCurrentLocationDto> userCurrentLocationDtos = new CopyOnWriteArrayList<>();
-        userList.parallelStream().forEach(user -> {
-            userCurrentLocationDtos.add(new UserCurrentLocationDto(user.getUserId().toString(),user.getLastVisitedLocation().getLocationTourGuide()));
+        List<UserCurrentLocationDto> userCurrentLocationDtoList = new CopyOnWriteArrayList<>();
+        userList.stream().forEach(user -> {
+            userCurrentLocationDtoList.add(new UserCurrentLocationDto(user.getUserId().toString(), user.getLastVisitedLocation().getLocationTourGuide()));
         });
 
-        return  userCurrentLocationDtos;
+        return userCurrentLocationDtoList;
     }
 
     private void addShutDownHook() {
@@ -297,7 +301,7 @@ public class TourGuideService {
     }
 
     private void generateUserPreference(User user) {
-        user.setUserPreferences(new UserPreferences(1,"USD",5,2,2,3));
+        user.setUserPreferences(new UserPreferences(1, "USD", 5, 2, 2, 3));
     }
 
     /**

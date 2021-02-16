@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.LocationTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
+import tourGuide.service.gpsUtil.IGpsUtilService;
+import tourGuide.service.rewardCentral.IRewardCentralService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
@@ -28,8 +30,8 @@ public class RewardsService {
     private static final int DEFAULT_PROXIMITY_BUFFER = 10;
     private int proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
     private static final int ATTRACTION_PROXIMITY_RANGE = 200;
-    private final GpsUtilService gpsUtilService;
-    private final RewardCentralService rewardCentralService;
+    private final IGpsUtilService gpsUtilService;
+    private final IRewardCentralService rewardCentralService;
     private ExecutorService executorService;
 
     /**
@@ -38,7 +40,7 @@ public class RewardsService {
      * @param gpsUtilService       gpsUtilService
      * @param rewardCentralService rewardCentralService
      */
-    public RewardsService(GpsUtilService gpsUtilService, RewardCentralService rewardCentralService) {
+    public RewardsService(IGpsUtilService gpsUtilService, IRewardCentralService rewardCentralService) {
         this.gpsUtilService = gpsUtilService;
         this.rewardCentralService = rewardCentralService;
         executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -69,19 +71,19 @@ public class RewardsService {
 
         //copy list of userLocations to avoid change of elements in this list during iterations on the list
         List<VisitedLocationTourGuide> userLocationsCopied = new CopyOnWriteArrayList<>(user.getVisitedLocations());
-        List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
 
-        userLocationsCopied.stream().forEach(visitedLocation ->
-                {
-                    attractionTourGuides.stream().forEach(attraction -> {
-                        if (user.getUserRewards().stream().noneMatch(r -> r.getAttractionTourGuide().getAttractionName().equals(attraction.getAttractionName()))) {
-                            if (nearAttraction(visitedLocation, attraction)) {
-                                user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user.getUserId())));
-                            }
+        List<AttractionTourGuide> attractionTourGuides = new CopyOnWriteArrayList<>(gpsUtilService.getAttractions());
+        if (attractionTourGuides != null) {
+            for (VisitedLocationTourGuide visitedLocation : userLocationsCopied) {
+                for (AttractionTourGuide attraction : attractionTourGuides) {
+                    if (user.getUserRewards().stream().noneMatch(reward -> reward.getAttractionTourGuide().getAttractionName().equals(attraction.getAttractionName()))) {
+                        if (nearAttraction(visitedLocation, attraction)) {
+                            user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user.getUserId())));
                         }
-                    });
+                    }
                 }
-        );
+            }
+        }
     }
 
     /**
@@ -92,20 +94,20 @@ public class RewardsService {
     public void calculateRewardsForUserList(List<User> userList) {
         logger.debug("Calculate Rewards for user list : nbUsers = " + userList.size());
 
-        ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(1000);
+        ExecutorService rewardsExecutorService = Executors.newFixedThreadPool(1500);
 
         userList.stream().forEach(user -> {
             Runnable runnableTask = () -> {
 
                 calculateRewards(user);
             };
-            rewardsExecutorService.execute(runnableTask);
+            rewardsExecutorService.submit(runnableTask);
         });
 
         rewardsExecutorService.shutdown();
 
         try {
-            boolean executorHasFinished = rewardsExecutorService.awaitTermination(25, TimeUnit.MINUTES);
+            boolean executorHasFinished = rewardsExecutorService.awaitTermination(20, TimeUnit.MINUTES);
             if (!executorHasFinished) {
                 logger.error("calculateRewards does not finish in 20 minutes elapsed time");
                 rewardsExecutorService.shutdownNow();
@@ -137,7 +139,7 @@ public class RewardsService {
      * Return rewardsPoints when user visited an attraction
      *
      * @param attractionTourGuide attraction
-     * @param userId     userId
+     * @param userId              userId
      * @return number of rewards points
      */
     public int getRewardPoints(AttractionTourGuide attractionTourGuide, UUID userId) {
