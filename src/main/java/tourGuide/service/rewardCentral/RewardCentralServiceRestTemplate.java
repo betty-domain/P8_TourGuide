@@ -1,4 +1,4 @@
-package tourGuide.service;
+package tourGuide.service.rewardCentral;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -12,8 +12,6 @@ import java.util.UUID;
 
 public class RewardCentralServiceRestTemplate implements IRewardCentralService {
     private final Logger logger = LoggerFactory.getLogger(RewardCentralServiceRestTemplate.class);
-
-    private static final String defaultRewardsCentralRootUrl = "http://localhost:8102";
 
     public static final String attractionsRewardsEndpoint = "/rewardsPoints";
 

@@ -1,4 +1,4 @@
-package tourGuide.service;
+package tourGuide.service.gpsUtil;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,8 +19,6 @@ import java.util.UUID;
  */
 public class GpsUtilServiceRestTemplate implements IGpsUtilService {
     private final Logger logger = LoggerFactory.getLogger(GpsUtilServiceRestTemplate.class);
-
-    private static final String defaultGpsUtilRootUrl = "http://localhost:8101";
 
     public static final String attractionsEndpoint = "/attractions";
 

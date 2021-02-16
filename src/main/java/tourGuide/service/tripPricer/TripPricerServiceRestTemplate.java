@@ -1,4 +1,4 @@
-package tourGuide.service;
+package tourGuide.service.tripPricer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,8 +19,6 @@ import java.util.UUID;
 public class TripPricerServiceRestTemplate implements ITripPricerService {
 
     private final Logger logger = LoggerFactory.getLogger(TripPricerServiceRestTemplate.class);
-
-    private static final String defaultTripPricerRootUrl = "http://localhost:8103";
 
     public static final String priceEndpoint = "/price";
 

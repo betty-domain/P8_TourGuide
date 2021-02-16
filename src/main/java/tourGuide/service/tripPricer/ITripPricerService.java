@@ -1,4 +1,4 @@
-package tourGuide.service;
+package tourGuide.service.tripPricer;
 
 import tourGuide.model.Provider;
 
@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ITripPricerService {
+
+    final String defaultTripPricerRootUrl = "http://localhost:8103";
 
     /**
      * get provider list of trips with calculated price for given parameters
