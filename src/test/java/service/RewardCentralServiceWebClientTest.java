@@ -7,7 +7,6 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import tourGuide.service.rewardCentral.RewardCentralServiceWebClient;
 
@@ -17,7 +16,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
-@Disabled
 public class RewardCentralServiceWebClientTest {
 
     public static MockWebServer mockBackEnd;
