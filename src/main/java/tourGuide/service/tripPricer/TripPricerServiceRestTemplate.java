@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import tourGuide.model.Provider;
@@ -45,11 +46,18 @@ public class TripPricerServiceRestTemplate implements ITripPricerService {
                 .queryParam("nightsStay", nightsStay)
                 .queryParam("rewardsPoints", rewardsPoints);
 
-        RestTemplate restTemplate = new RestTemplate();
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<List<Provider>> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, null,
+                    new ParameterizedTypeReference<List<Provider>>() {
+                    });
+            return response.getBody();
+        } catch (
+                RestClientException exception) {
+            logger.error("Exception during tripPricer.getPrice : " + exception.getMessage());
+            return null;
+        }
 
-        ResponseEntity<List<Provider>> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, null,
-                new ParameterizedTypeReference<List<Provider>>() {});
-        return response.getBody();
     }
 
     /**
@@ -66,10 +74,15 @@ public class TripPricerServiceRestTemplate implements ITripPricerService {
                 .queryParam("apiKey", apiKey)
                 .queryParam("adults", adults);
 
-        RestTemplate restTemplate = new RestTemplate();
-
-        ResponseEntity<String> response = restTemplate.getForEntity(builder.toUriString(), String.class);
-        return response.getBody();
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.getForEntity(builder.toUriString(), String.class);
+            return response.getBody();
+        } catch (
+                RestClientException exception) {
+            logger.error("Exception during tripPricer.getProviderName : " + exception.getMessage());
+            return null;
+        }
     }
 
 }
