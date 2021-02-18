@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import tourGuide.model.AttractionTourGuide;
@@ -35,9 +36,14 @@ public class GpsUtilServiceRestTemplate implements IGpsUtilService {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(defaultGpsUtilRootUrl + userLocationEndpoint).
                 queryParam("userId", userId);
 
-        ResponseEntity<VisitedLocationTourGuide> responseEntity = restTemplate.getForEntity(uriComponentsBuilder.toUriString(), VisitedLocationTourGuide.class);
+        try {
+            ResponseEntity<VisitedLocationTourGuide> responseEntity = restTemplate.getForEntity(uriComponentsBuilder.toUriString(), VisitedLocationTourGuide.class);
 
-        return  responseEntity.getBody();
+            return responseEntity.getBody();
+        } catch (RestClientException exception) {
+            logger.error("Exception during gpsUtilService.getUserLocation : " + exception.getMessage());
+            return null;
+        }
 
     }
 
@@ -50,13 +56,19 @@ public class GpsUtilServiceRestTemplate implements IGpsUtilService {
 
         logger.debug("Call to gpsUtilService.getAttractions()");
 
-        RestTemplate restTemplate = new RestTemplate();
         StringBuilder str = new StringBuilder();
         str.append(defaultGpsUtilRootUrl);
         str.append(attractionsEndpoint);
-        ResponseEntity<List<AttractionTourGuide>> responseEntity = restTemplate.exchange(str.toString(), HttpMethod.GET,null,
-                new ParameterizedTypeReference<List<AttractionTourGuide>>(){});
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<List<AttractionTourGuide>> responseEntity = restTemplate.exchange(str.toString(), HttpMethod.GET, null,
+                    new ParameterizedTypeReference<List<AttractionTourGuide>>() {
+                    });
 
-        return responseEntity.getBody();
+            return responseEntity.getBody();
+        } catch (RestClientException exception) {
+            logger.error("Exception during gpsUtilService.getAttractions : " + exception.getMessage());
+            return null;
+        }
     }
 }
