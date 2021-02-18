@@ -1,11 +1,13 @@
 package tourGuide;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.AttractionTourGuide;
 import tourGuide.model.VisitedLocationTourGuide;
+import tourGuide.service.InitializationService;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.service.gpsUtil.GpsUtilServiceRestTemplate;
@@ -55,12 +57,15 @@ public class TestPerformance {
 
     private IRewardCentralService rewardCentralService;
 
+    private InitializationService initializationService;
+
     @BeforeEach
     public void setUp() {
         gpsUtilService = new GpsUtilServiceRestTemplate();
         tripPricerService = new TripPricerServiceRestTemplate();
         rewardCentralService = new RewardCentralServiceRestTemplate();
-        InternalTestHelper.setInternalUserNumber(100);
+        initializationService = new InitializationService();
+        InternalTestHelper.setInternalUserNumber(10);
 
     }
 
@@ -69,7 +74,7 @@ public class TestPerformance {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
 
         rewardsService = new RewardsService(gpsUtilService, rewardCentralService);
-        tourGuideService = new TourGuideService(gpsUtilService, rewardsService, tripPricerService);
+        tourGuideService = new TourGuideService(gpsUtilService, rewardsService, tripPricerService, initializationService);
         tourGuideService.tracker.stopTracking();
 
         List<User> allUsers = new ArrayList<>();
@@ -90,7 +95,7 @@ public class TestPerformance {
     @Test
     public void highVolumeGetRewardsNewPerf() {
         rewardsService = new RewardsService(gpsUtilService, rewardCentralService);
-        tourGuideService = new TourGuideService(gpsUtilService, rewardsService, tripPricerService);
+        tourGuideService = new TourGuideService(gpsUtilService, rewardsService, tripPricerService, initializationService);
         tourGuideService.tracker.stopTracking();
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
@@ -106,7 +111,11 @@ public class TestPerformance {
         rewardsService.calculateRewardsForUserList(allUsers);
 
         allUsers.stream().forEach(user -> {
-            assertThat(user.getUserRewards().size()).isGreaterThan(0);
+            try {
+                System.out.println(new ObjectMapper().writeValueAsString(user));
+                assertThat(user.getUserRewards().size()).isGreaterThan(0);
+            } catch (Exception exception) {
+            }
         });
 
         stopWatch.stop();

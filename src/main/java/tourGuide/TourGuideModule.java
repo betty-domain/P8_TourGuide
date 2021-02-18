@@ -2,6 +2,7 @@ package tourGuide;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tourGuide.service.InitializationService;
 import tourGuide.service.gpsUtil.GpsUtilServiceRestTemplate;
 import tourGuide.service.gpsUtil.IGpsUtilService;
 import tourGuide.service.rewardCentral.IRewardCentralService;
@@ -13,6 +14,12 @@ import tourGuide.service.tripPricer.TripPricerServiceRestTemplate;
 
 @Configuration
 public class TourGuideModule {
+
+    @Bean
+    public InitializationService getInitializationService()
+    {
+        return new InitializationService();
+    }
 
 
     @Bean
@@ -41,7 +48,7 @@ public class TourGuideModule {
     @Bean
     public TourGuideService getTourGuideService()
     {
-        return new TourGuideService(getGpsUtilService(),getRewardsService(), getTripPricerService());
+        return new TourGuideService(getGpsUtilService(),getRewardsService(), getTripPricerService(), getInitializationService());
     }
 
 

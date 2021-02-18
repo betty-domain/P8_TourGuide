@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tourGuide.model.Provider;
 import tourGuide.model.VisitedLocationTourGuide;
 import tourGuide.service.TourGuideService;
+import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
 
 import java.util.List;
@@ -99,6 +100,12 @@ public class TourGuideController {
     public String getTripDeals(@RequestParam String userName) {
         List<Provider> providers = tourGuideService.getTripDeals(userName);
         return JsonStream.serialize(providers);
+    }
+
+    @RequestMapping("/users")
+    public List<User> getAllUsers()
+    {
+        return tourGuideService.getAllUsers();
     }
 
     @PostMapping("/userPreferences")

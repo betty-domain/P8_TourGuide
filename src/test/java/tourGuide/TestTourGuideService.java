@@ -11,6 +11,7 @@ import tourGuide.model.NearbyAttractionDto;
 import tourGuide.model.Provider;
 import tourGuide.model.UserCurrentLocationDto;
 import tourGuide.model.VisitedLocationTourGuide;
+import tourGuide.service.InitializationService;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.service.gpsUtil.IGpsUtilService;
@@ -45,7 +46,7 @@ public class TestTourGuideService {
     @BeforeEach
     public void setUp() {
         InternalTestHelper.setInternalUserNumber(0);
-        tourGuideService = new TourGuideService(gpsUtilServiceMock, rewardsServiceMock, tripPricerServiceMock);
+        tourGuideService = new TourGuideService(gpsUtilServiceMock, rewardsServiceMock, tripPricerServiceMock, new InitializationService());
         tourGuideService.tracker.stopTracking();
     }
 

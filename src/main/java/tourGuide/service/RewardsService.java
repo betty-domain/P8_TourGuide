@@ -27,12 +27,11 @@ public class RewardsService {
     private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
 
     // proximity in miles
-    private static final int DEFAULT_PROXIMITY_BUFFER = 10;
+    private static final int DEFAULT_PROXIMITY_BUFFER = 10000;
     private int proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
     private static final int ATTRACTION_PROXIMITY_RANGE = 200;
     private final IGpsUtilService gpsUtilService;
     private final IRewardCentralService rewardCentralService;
-    private ExecutorService executorService;
 
     /**
      * Constructor with necessary services
@@ -43,7 +42,6 @@ public class RewardsService {
     public RewardsService(IGpsUtilService gpsUtilService, IRewardCentralService rewardCentralService) {
         this.gpsUtilService = gpsUtilService;
         this.rewardCentralService = rewardCentralService;
-        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
     /**
