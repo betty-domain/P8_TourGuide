@@ -52,6 +52,7 @@ public class TestRewardsService {
         AttractionTourGuide attractionTourGuide = gpsUtilServiceMock.getAttractions().get(0);
         user.addToVisitedLocations(new VisitedLocationTourGuide(user.getUserId(), attractionTourGuide, new Date()));
 
+        rewardsService.setProximityBuffer(10);
         rewardsService.calculateRewards(user);
 
         List<UserReward> userRewards = user.getUserRewards();
@@ -84,6 +85,8 @@ public class TestRewardsService {
         List<User> userList = new ArrayList<>();
         userList.add(user1);
         userList.add(user2);
+
+        rewardsService.setProximityBuffer(10);
         rewardsService.calculateRewardsForUserList(userList);
 
         userList.stream().forEach(user ->

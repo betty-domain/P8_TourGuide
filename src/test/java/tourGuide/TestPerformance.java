@@ -65,7 +65,7 @@ public class TestPerformance {
         tripPricerService = new TripPricerServiceRestTemplate();
         rewardCentralService = new RewardCentralServiceRestTemplate();
         initializationService = new InitializationService();
-        InternalTestHelper.setInternalUserNumber(10);
+        InternalTestHelper.setInternalUserNumber(100);
 
     }
 

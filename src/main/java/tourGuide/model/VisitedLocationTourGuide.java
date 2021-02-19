@@ -1,6 +1,5 @@
 package tourGuide.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +13,7 @@ public class VisitedLocationTourGuide {
     private UUID userId;
     @JsonProperty("location")
     private LocationTourGuide locationTourGuide;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+
     private Date timeVisited;
 
     public VisitedLocationTourGuide()
